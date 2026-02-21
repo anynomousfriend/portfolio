@@ -13,56 +13,17 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
   design: [
     {
       id: 1,
-      title: 'Fintech Dashboard',
-      desc: 'A comprehensive financial interface focusing on data visualization and dark mode accessibility.',
-      tags: ['UI/UX', 'Figma', 'Design System'],
-      visual: <PolishedImageVisual imageUrl="https://images.unsplash.com/photo-1618038483079-bfe64dcb17f1?auto=format&fit=crop&w=800&q=80" fallbackAlt="Fintech Dashboard Preview" />,
+      title: 'PoolFunders',
+      desc: 'End-to-end product design for the world\'s first DeFi reward-based crowdfunding platform. Translates complex mechanisms—like staking $TPFT, DAO participation, and NFT rewards—into accessible, intuitive user flows.',
+      tags: ['UI/UX', 'Figma', 'DeFi', 'Prototyping'],
+      visual: <PolishedImageVisual imageUrl="/poolfunder-cover.webp" fallbackAlt="PoolFunders Preview" />,
     },
     {
       id: 2,
-      title: 'E-Commerce Mobile App',
-      desc: 'End-to-end product design for a luxury fashion retailer, featuring gesture-based navigation.',
-      tags: ['Mobile', 'Prototyping', 'User Research'],
-      visual: (
-        <div className="w-full h-full bg-zinc-900 flex items-center justify-center group-hover:bg-zinc-800/50 transition-colors p-2">
-          <div className="relative w-20 h-36 border-2 border-zinc-700 rounded-lg bg-black overflow-hidden shadow-xl group-hover:scale-[1.15] group-hover:rotate-2 transition-all duration-500 cursor-pointer">
-            <div className="h-4 w-full bg-zinc-900 flex items-center justify-between px-1.5">
-              <div className="w-3 h-0.5 bg-zinc-600 rounded group-hover:bg-zinc-500/50 transition-colors" />
-              <div className="w-6 h-0.5 bg-zinc-600 rounded" />
-            </div>
-            <div className="w-full h-16 bg-zinc-800 relative overflow-hidden">
-              <div className="absolute inset-0 bg-zinc-900/20 group-hover:bg-zinc-600/40 transition-colors duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-zinc-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            </div>
-            <div className="p-1.5 space-y-1">
-              <div className="w-12 h-1 bg-zinc-700 rounded group-hover:w-14 transition-all" />
-              <div className="w-8 h-1 bg-zinc-800 rounded group-hover:w-10 transition-all delay-75" />
-              <div className="mt-1.5 w-full h-4 bg-zinc-600 rounded flex items-center justify-center group-hover:bg-zinc-500 transition-colors">
-                <div className="w-10 h-0.5 bg-white/50 rounded group-hover:w-14 transition-all duration-500" />
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 3,
-      title: "Brand Identity: 'Apex'",
-      desc: 'Complete rebranding package including logo, typography, and marketing assets.',
-      tags: ['Branding', 'Identity', 'Print'],
-      visual: (
-        <div className="w-full h-full bg-zinc-900 flex items-center justify-center relative overflow-hidden group-hover:bg-zinc-800/50 transition-colors cursor-pointer">
-          <div className="absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '12px 12px' }} />
-          <div className="relative w-24 h-24 flex items-center justify-center">
-            <div className="absolute w-16 h-16 border border-zinc-700 rounded-full group-hover:scale-[1.4] transition-transform duration-700 opacity-40 group-hover:border-zinc-500/50" />
-            <div className="absolute w-16 h-16 border border-zinc-700 rounded-full group-hover:scale-[0.6] transition-transform duration-700 delay-100 opacity-40 group-hover:border-zinc-500/50" />
-            <div className="relative z-10 w-12 h-12 border-2 border-zinc-500 transform rotate-45 group-hover:rotate-[405deg] transition-transform duration-1000 ease-in-out group-hover:scale-110">
-              <div className="absolute top-0 right-0 w-full h-full bg-zinc-500/20 backdrop-blur-sm group-hover:bg-zinc-500/40 transition-colors" />
-            </div>
-            <div className="absolute z-20 w-1.5 h-1.5 bg-white rounded-full group-hover:scale-150 transition-transform" />
-          </div>
-        </div>
-      ),
+      title: 'Foliobull',
+      desc: 'Product design for an AI-driven digital asset portfolio management platform. Features a unified dashboard aggregating multi-exchange data, nested graphical representations, and intuitive manual trading interfaces.',
+      tags: ['Web3', 'Figma', 'Dashboard Design', 'Data Visualization'],
+      visual: <PolishedImageVisual imageUrl="/Foliobull-cover.webp" fallbackAlt="Foliobull Preview" />,
     },
   ],
   dev: [
