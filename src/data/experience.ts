@@ -11,12 +11,13 @@ export const experience: ExperienceData[] = [
     liveUrl: 'https://batch21.buidlguidl.com/timeline',
   },
   {
-    company: 'TechNova Corp',
-    role: 'Senior Product Designer',
-    period: '2022 - Present',
+    company: 'PoolFunders',
+    role: 'Product Designer',
+    period: '2022',
     description:
-      'Leading the design system initiative and overseeing user experience for the core SaaS product suite. Improved user retention by 15% through iterative UX enhancements.',
-    technologies: ['Figma', 'React', 'Storybook', 'Jira'],
+      'Spearheaded the end-to-end product design for the world\'s first DeFi reward-based crowdfunding platform tailored for startups and creators. My primary challenge was translating complex DeFi mechanisms—such as staking $TPFT for governance rights, DAO participation, and NFT-based reward investments—into an intuitive, accessible user experience for non-crypto-native backers and artists. I designed distinct, user-centric flows for raising funds, investing, and staking, ensuring that trust and transparency were centralized in the UI to encourage global participation in the platform\'s DAO governance model.',
+    technologies: ['Figma', 'UI/UX Design', 'DeFi', 'Prototyping', 'User Research'],
+    liveUrl: 'https://www.poolfunders.com/',
   },
   {
     company: 'Creative Pulse Studios',
