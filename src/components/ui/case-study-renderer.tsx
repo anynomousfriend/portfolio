@@ -132,9 +132,9 @@ export function CaseStudyRenderer({ content, className, repoUrl }: CaseStudyRend
                 {lang && (
                   <div className="flex items-center justify-between px-4 py-2 bg-zinc-900 border-b border-border">
                     <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-500/60" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-500/60" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-500/60" />
                     </div>
                     <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">{lang}</span>
                   </div>

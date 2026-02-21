@@ -61,7 +61,7 @@ export function RobotCompanion() {
 
         {/* Shy tooltip */}
         {expression === 'shy' && !isMoving && (
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-popover text-[10px] text-popover-foreground px-2 py-1 rounded-md border border-pink-500/30 animate-[fade-in-out_4s_ease-in-out_forwards]">
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-popover text-[10px] text-popover-foreground px-2 py-1 rounded-md border border-zinc-500/30 animate-[fade-in-out_4s_ease-in-out_forwards]">
             😳 eep!
           </div>
         )}

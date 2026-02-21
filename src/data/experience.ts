@@ -6,8 +6,9 @@ export const experience: ExperienceData[] = [
     role: 'Full-Stack Web3 Developer — Scaffold-ETH Ecosystem',
     period: 'Oct – Nov 2025',
     description:
-      'Built and shipped a full on-chain activity timeline for the Batch 21 cohort site, tracking every builder\'s journey from kickoff to graduation. Deployed a custom subgraph on The Graph (Arbitrum) to index BatchRegistry check-in events and Graduation NFT mints via GraphQL queries. Implemented three parallel React Query hooks — useCheckInEventsFromSubgraph, useGraduationNFTEventsFromSubgraph, and useGitHubPREvents — that merge and chronologically sort on-chain events with merged GitHub PRs from the batch repo. Built the BatchTimeline UI component with an alternating left-right card layout, type-specific styling (on-chain check-ins, graduation NFTs, merged PRs), animated milestones for kickoff and wrap-up dates, and a loading state with floating Ethereum logo animations. Also added a Batch Timeline nav link to the core Scaffold-ETH header, integrated IPFS via kubo-rpc-client, and managed graphql-request dependency upgrades across the Yarn 3 monorepo.',
-    technologies: ['Scaffold-ETH', 'Next.js', 'TypeScript', 'The Graph', 'GraphQL', 'IPFS', 'Ethereum', 'React Query'],
+      'Engineered a comprehensive activity timeline for the BuidlGuidl Batch 21 cohort, tracking builder progress from kickoff to graduation. Built a custom data aggregation layer using React Query that concurrently fetches and chronologically merges on-chain events (check-ins and NFT mints) from an Arbitrum subgraph via GraphQL, alongside off-chain pull requests from the GitHub API. Developed a responsive, alternating timeline UI in Next.js featuring type-specific event badges, animated loading states, and direct Arbiscan integration. Seamlessly integrated the feature into the core Scaffold-ETH frontend architecture.',
+    technologies: ['Scaffold-ETH', 'Next.js', 'TypeScript', 'The Graph', 'GraphQL', 'React Query', 'Tailwind CSS'],
+    liveUrl: 'https://batch21.buidlguidl.com/timeline',
   },
   {
     company: 'TechNova Corp',

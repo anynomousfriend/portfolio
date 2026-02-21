@@ -287,7 +287,7 @@
    ============================================ */
 
 .hero-shader-bg {
-  background: radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.15) 0%, rgba(9, 9, 11, 0) 70%),
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(9, 9, 11, 0) 70%),
     linear-gradient(45deg, rgba(9, 9, 11, 1), rgba(24, 24, 27, 0.8), rgba(9, 9, 11, 1));
   background-size: 200% 200%;
   animation: gradient-shift 15s ease infinite;
@@ -295,30 +295,30 @@
 
 :root {
   --radius: 0.75rem;
-  /* Dark theme (default) - matching zinc-950 (#09090b) background with indigo accents */
+  /* Dark theme (default) - matching zinc-950 (#09090b) background with monochrome accents */
   --background: oklch(0.058 0 0); /* #09090b - zinc-950 */
   --foreground: oklch(0.92 0 0); /* #e4e4e7 - zinc-200 */
   --card: oklch(0.12 0 0); /* #18181b - zinc-900 */
   --card-foreground: oklch(0.92 0 0);
   --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.92 0 0);
-  --primary: oklch(0.568 0.207 276.363); /* #6366f1 - indigo-500 */
-  --primary-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.98 0 0); /* #f8f8f8 - white-ish */
+  --primary-foreground: oklch(0.058 0 0);
   --secondary: oklch(0.169 0 0); /* #27272a - zinc-800 */
   --secondary-foreground: oklch(0.92 0 0);
   --muted: oklch(0.169 0 0);
   --muted-foreground: oklch(0.64 0 0); /* #a1a1aa - zinc-400 */
   --accent: oklch(0.169 0 0);
   --accent-foreground: oklch(0.92 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.5 0 0); /* Gray */
   --border: oklch(0.22 0 0); /* #3f3f46 - zinc-700 */
   --input: oklch(0.22 0 0);
-  --ring: oklch(0.568 0.207 276.363); /* indigo-500 */
-  --chart-1: oklch(0.568 0.207 276.363);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --ring: oklch(0.92 0 0); /* light gray */
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.8 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.4 0 0);
+  --chart-5: oklch(0.2 0 0);
 }
 
 @layer base {

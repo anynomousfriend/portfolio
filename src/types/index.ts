@@ -58,4 +58,5 @@ export type ExperienceData = {
   period: string;
   description: string;
   technologies: string[];
+  liveUrl?: string;
 };

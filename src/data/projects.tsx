@@ -18,32 +18,32 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
       visual: (
         <div className="w-full h-full bg-zinc-900 p-2 flex flex-col gap-1.5 group-hover:bg-zinc-800/50 transition-colors">
           <div className="w-full h-3 bg-zinc-800 rounded-sm flex justify-between items-center px-1.5 group-hover:bg-zinc-700/50 transition-colors shrink-0">
-            <div className="w-6 h-0.5 bg-zinc-700 rounded-full group-hover:bg-indigo-500/50 transition-colors" />
-            <div className="flex gap-0.5"><div className="w-1.5 h-1.5 rounded-full bg-red-500/50 group-hover:bg-red-500 transition-colors" /></div>
+            <div className="w-6 h-0.5 bg-zinc-700 rounded-full group-hover:bg-zinc-500/50 transition-colors" />
+            <div className="flex gap-0.5"><div className="w-1.5 h-1.5 rounded-full bg-zinc-500/50 group-hover:bg-zinc-500 transition-colors" /></div>
           </div>
           <div className="flex gap-1.5 flex-1 min-h-0">
             <div className="w-6 bg-zinc-800 rounded-sm flex flex-col gap-1 p-0.5 group-hover:scale-105 transition-transform shrink-0">
-              <div className="w-full aspect-square bg-zinc-700/50 rounded-sm group-hover:bg-indigo-500/30 transition-colors" />
+              <div className="w-full aspect-square bg-zinc-700/50 rounded-sm group-hover:bg-zinc-500/30 transition-colors" />
               <div className="w-full aspect-square bg-zinc-700/50 rounded-sm" />
               <div className="w-full aspect-square bg-zinc-700/50 rounded-sm" />
             </div>
             <div className="flex-1 flex flex-col gap-1.5 min-h-0">
               <div className="grid grid-cols-2 gap-1.5 shrink-0">
                 <div className="h-10 bg-zinc-800 rounded-sm p-1.5 flex flex-col justify-between group-hover:scale-105 transition-transform">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-500 text-[7px] group-hover:bg-indigo-500/40 transition-colors">$</div>
+                  <div className="w-3 h-3 rounded-full bg-zinc-500/20 flex items-center justify-center text-zinc-500 text-[7px] group-hover:bg-zinc-500/40 transition-colors">$</div>
                   <div className="w-8 h-0.5 bg-zinc-700 rounded-full group-hover:w-10 transition-all" />
                 </div>
                 <div className="h-10 bg-zinc-800 rounded-sm p-1.5 flex flex-col justify-between group-hover:scale-105 transition-transform delay-75">
-                  <div className="w-3 h-3 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 text-[7px] group-hover:bg-green-500/40 transition-colors">%</div>
+                  <div className="w-3 h-3 rounded-full bg-zinc-500/20 flex items-center justify-center text-zinc-500 text-[7px] group-hover:bg-zinc-500/40 transition-colors">%</div>
                   <div className="w-6 h-0.5 bg-zinc-700 rounded-full group-hover:w-8 transition-all" />
                 </div>
               </div>
               <div className="flex-1 bg-zinc-800 rounded-sm relative overflow-hidden flex items-end justify-around p-1.5 pb-0 gap-0.5 group-hover:bg-zinc-700/50 transition-colors min-h-0">
-                <div className="w-full bg-indigo-500/60 h-[40%] group-hover:h-[75%] transition-all duration-500 ease-out rounded-t-sm cursor-pointer" />
+                <div className="w-full bg-zinc-500/60 h-[40%] group-hover:h-[75%] transition-all duration-500 ease-out rounded-t-sm cursor-pointer" />
                 <div className="w-full bg-zinc-700 h-[60%] group-hover:h-[35%] transition-all duration-500 ease-out delay-50 rounded-t-sm cursor-pointer" />
-                <div className="w-full bg-indigo-500/60 h-[30%] group-hover:h-[85%] transition-all duration-500 ease-out delay-100 rounded-t-sm cursor-pointer" />
+                <div className="w-full bg-zinc-500/60 h-[30%] group-hover:h-[85%] transition-all duration-500 ease-out delay-100 rounded-t-sm cursor-pointer" />
                 <div className="w-full bg-zinc-700 h-[80%] group-hover:h-[45%] transition-all duration-500 ease-out delay-150 rounded-t-sm cursor-pointer" />
-                <div className="w-full bg-indigo-500/60 h-[50%] group-hover:h-[95%] transition-all duration-500 ease-out delay-200 rounded-t-sm cursor-pointer" />
+                <div className="w-full bg-zinc-500/60 h-[50%] group-hover:h-[95%] transition-all duration-500 ease-out delay-200 rounded-t-sm cursor-pointer" />
               </div>
             </div>
           </div>
@@ -59,17 +59,17 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
         <div className="w-full h-full bg-zinc-900 flex items-center justify-center group-hover:bg-zinc-800/50 transition-colors p-2">
           <div className="relative w-20 h-36 border-2 border-zinc-700 rounded-lg bg-black overflow-hidden shadow-xl group-hover:scale-[1.15] group-hover:rotate-2 transition-all duration-500 cursor-pointer">
             <div className="h-4 w-full bg-zinc-900 flex items-center justify-between px-1.5">
-              <div className="w-3 h-0.5 bg-zinc-600 rounded group-hover:bg-indigo-500/50 transition-colors" />
+              <div className="w-3 h-0.5 bg-zinc-600 rounded group-hover:bg-zinc-500/50 transition-colors" />
               <div className="w-6 h-0.5 bg-zinc-600 rounded" />
             </div>
             <div className="w-full h-16 bg-zinc-800 relative overflow-hidden">
-              <div className="absolute inset-0 bg-indigo-900/20 group-hover:bg-indigo-600/40 transition-colors duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-purple-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-zinc-900/20 group-hover:bg-zinc-600/40 transition-colors duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-zinc-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             </div>
             <div className="p-1.5 space-y-1">
               <div className="w-12 h-1 bg-zinc-700 rounded group-hover:w-14 transition-all" />
               <div className="w-8 h-1 bg-zinc-800 rounded group-hover:w-10 transition-all delay-75" />
-              <div className="mt-1.5 w-full h-4 bg-indigo-600 rounded flex items-center justify-center group-hover:bg-indigo-500 transition-colors">
+              <div className="mt-1.5 w-full h-4 bg-zinc-600 rounded flex items-center justify-center group-hover:bg-zinc-500 transition-colors">
                 <div className="w-10 h-0.5 bg-white/50 rounded group-hover:w-14 transition-all duration-500" />
               </div>
             </div>
@@ -86,10 +86,10 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
         <div className="w-full h-full bg-zinc-900 flex items-center justify-center relative overflow-hidden group-hover:bg-zinc-800/50 transition-colors cursor-pointer">
           <div className="absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '12px 12px' }} />
           <div className="relative w-24 h-24 flex items-center justify-center">
-            <div className="absolute w-16 h-16 border border-zinc-700 rounded-full group-hover:scale-[1.4] transition-transform duration-700 opacity-40 group-hover:border-indigo-500/50" />
-            <div className="absolute w-16 h-16 border border-zinc-700 rounded-full group-hover:scale-[0.6] transition-transform duration-700 delay-100 opacity-40 group-hover:border-purple-500/50" />
-            <div className="relative z-10 w-12 h-12 border-2 border-indigo-500 transform rotate-45 group-hover:rotate-[405deg] transition-transform duration-1000 ease-in-out group-hover:scale-110">
-              <div className="absolute top-0 right-0 w-full h-full bg-indigo-500/20 backdrop-blur-sm group-hover:bg-indigo-500/40 transition-colors" />
+            <div className="absolute w-16 h-16 border border-zinc-700 rounded-full group-hover:scale-[1.4] transition-transform duration-700 opacity-40 group-hover:border-zinc-500/50" />
+            <div className="absolute w-16 h-16 border border-zinc-700 rounded-full group-hover:scale-[0.6] transition-transform duration-700 delay-100 opacity-40 group-hover:border-zinc-500/50" />
+            <div className="relative z-10 w-12 h-12 border-2 border-zinc-500 transform rotate-45 group-hover:rotate-[405deg] transition-transform duration-1000 ease-in-out group-hover:scale-110">
+              <div className="absolute top-0 right-0 w-full h-full bg-zinc-500/20 backdrop-blur-sm group-hover:bg-zinc-500/40 transition-colors" />
             </div>
             <div className="absolute z-20 w-1.5 h-1.5 bg-white rounded-full group-hover:scale-150 transition-transform" />
           </div>
