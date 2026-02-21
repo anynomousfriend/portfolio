@@ -1,12 +1,12 @@
 'use client';
 
-import { 
-  Code2, 
-  Figma, 
-  LayoutTemplate, 
-  Server, 
-  Box, 
-  Globe, 
+import {
+  Code2,
+  Figma,
+  LayoutTemplate,
+  Server,
+  Box,
+  Globe,
   Cpu,
   Palette,
   Trello,
@@ -20,7 +20,7 @@ import {
 
 // Map of tech names to SimpleIcons slugs
 // Special cases can define a color override if the brand color is too dark for the UI
-const iconMap: Record<string, string | { slug: string; color?: string }> = {
+const iconMap: Record<string, string | { slug: string; color?: string } | { imageUrl: string }> = {
   'react': 'react',
   'next.js': { slug: 'nextdotjs', color: 'white' }, // Force white for dark mode
   'node.js': 'nodedotjs',
@@ -64,7 +64,7 @@ const iconMap: Record<string, string | { slug: string; color?: string }> = {
   'stacks': { slug: 'stacks', color: 'white' },
   'clarity': { slug: 'stacks', color: 'white' },
   // Data / query
-  'the graph': { slug: 'thegraph', color: 'white' },
+  'the graph': { imageUrl: 'https://storage.thegraph.com/favicons/64x64.png' },
   'graphql': 'graphql',
   'react query': { slug: 'reactquery', color: 'white' },
 };
@@ -94,18 +94,32 @@ export function TechIcon({ name, size = 16 }: TechIconProps) {
   const iconDef = iconMap[key];
 
   if (iconDef) {
+    // Direct image URL case
+    if (typeof iconDef === 'object' && 'imageUrl' in iconDef) {
+      return (
+        <img
+          src={iconDef.imageUrl}
+          alt={name}
+          width={size}
+          height={size}
+          className="object-contain"
+          style={{ width: size, height: size }}
+        />
+      );
+    }
+
     const slug = typeof iconDef === 'string' ? iconDef : iconDef.slug;
     const color = typeof iconDef === 'object' ? iconDef.color : undefined;
-    
+
     // Construct URL: cdn.simpleicons.org/SLUG/COLOR (color is optional)
     const src = `https://cdn.simpleicons.org/${slug}${color ? `/${color}` : ''}`;
 
     return (
-      <img 
-        src={src} 
-        alt={name} 
-        width={size} 
-        height={size} 
+      <img
+        src={src}
+        alt={name}
+        width={size}
+        height={size}
         className="object-contain"
         style={{ width: size, height: size }}
       />
@@ -114,6 +128,6 @@ export function TechIcon({ name, size = 16 }: TechIconProps) {
 
   // Fallback for special cases not in map or concepts
   if (key === 'webgl') return <Box size={size} />;
-  
+
   return getLucideIcon(name, size);
 }
