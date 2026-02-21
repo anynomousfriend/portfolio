@@ -20,12 +20,12 @@ export const experience: ExperienceData[] = [
     liveUrl: 'https://www.poolfunders.com/',
   },
   {
-    company: 'Creative Pulse Studios',
-    role: 'Full Stack Developer',
-    period: '2020 - 2022',
+    company: 'Foliobull',
+    role: 'Product Designer',
+    period: '2023',
     description:
-      'Developed high-performance marketing websites and web applications for Fortune 500 clients. Specialized in creating immersive, interactive frontend experiences.',
-    technologies: ['Next.js', 'Node.js', 'WebGL', 'Three.js'],
+      'Led the product design for an AI-driven digital asset portfolio management platform. To solve the problem of fragmented crypto tracking, I designed a unified dashboard that seamlessly aggregates data from multiple exchanges (Binance, Coinbase, Kraken, etc.) via API integrations. My focus was on creating clear, nested graphical representations of portfolios and simplifying manual trading functions for digital coins and NFTs. I prioritized data visualization and intuitive UX to empower users with bias-free market analysis and real-time insights without needing multiple applications.',
+    technologies: ['Figma', 'UI/UX Design', 'Data Visualization', 'Web3', 'Dashboard Design'],
   },
   {
     company: 'Apex Solutions',
