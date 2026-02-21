@@ -2,6 +2,14 @@ import type { ExperienceData } from '@/types';
 
 export const experience: ExperienceData[] = [
   {
+    company: 'Freelance',
+    role: 'Lead Product Designer',
+    period: '2024 - Present',
+    description:
+      'Partnered with diverse B2B and B2C clients to architect specialized applications from zero to one. For a **Risk Management SaaS**, I applied *Miller’s Law* to chunk dense financial data into digestible widget dashboards, significantly reducing cognitive overload for analysts. In a **Lawyer’s SaaS** platform, I utilized *Fitts’s Law* to position high-frequency case management actions prominently, accelerating document workflows. For **Medical Apps**, I mapped critical patient journeys using the *Peak-End Rule*, ensuring positive emotional resonance during appointment bookings and test result reviews. Additionally, I designed intuitive **Productivity Apps**, leveraging the *Zeigarnik Effect* through visual progress indicators to drive task completion rates and long-term user habit formation.',
+    technologies: ['Figma', 'UX Laws', 'Prototyping', 'User Research', 'SaaS Design'],
+  },
+  {
     company: 'BuidlGuidl Batch 21',
     role: 'Full-Stack Web3 Developer — Scaffold-ETH Ecosystem',
     period: 'Oct – Nov 2025',
