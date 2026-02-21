@@ -13,7 +13,7 @@ export const experience: ExperienceData[] = [
   {
     company: 'PoolFunders',
     role: 'Product Designer',
-    period: '2022',
+    period: '2023',
     description:
       'Spearheaded the end-to-end product design for the world\'s first DeFi reward-based crowdfunding platform tailored for startups and creators. My primary challenge was translating complex DeFi mechanisms—such as staking $TPFT for governance rights, DAO participation, and NFT-based reward investments—into an intuitive, accessible user experience for non-crypto-native backers and artists. I designed distinct, user-centric flows for raising funds, investing, and staking, ensuring that trust and transparency were centralized in the UI to encourage global participation in the platform\'s DAO governance model.',
     technologies: ['Figma', 'UI/UX Design', 'DeFi', 'Prototyping', 'User Research'],
