@@ -1,5 +1,6 @@
 import type { ProjectData, ProjectCategory } from '@/types';
 import {
+  PolishedImageVisual,
   PayPerRequestVisual,
   TemporalVaultVisual,
   ZKConsentVisual,
@@ -15,40 +16,7 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
       title: 'Fintech Dashboard',
       desc: 'A comprehensive financial interface focusing on data visualization and dark mode accessibility.',
       tags: ['UI/UX', 'Figma', 'Design System'],
-      visual: (
-        <div className="w-full h-full bg-zinc-900 p-2 flex flex-col gap-1.5 group-hover:bg-zinc-800/50 transition-colors">
-          <div className="w-full h-3 bg-zinc-800 rounded-sm flex justify-between items-center px-1.5 group-hover:bg-zinc-700/50 transition-colors shrink-0">
-            <div className="w-6 h-0.5 bg-zinc-700 rounded-full group-hover:bg-zinc-500/50 transition-colors" />
-            <div className="flex gap-0.5"><div className="w-1.5 h-1.5 rounded-full bg-zinc-500/50 group-hover:bg-zinc-500 transition-colors" /></div>
-          </div>
-          <div className="flex gap-1.5 flex-1 min-h-0">
-            <div className="w-6 bg-zinc-800 rounded-sm flex flex-col gap-1 p-0.5 group-hover:scale-105 transition-transform shrink-0">
-              <div className="w-full aspect-square bg-zinc-700/50 rounded-sm group-hover:bg-zinc-500/30 transition-colors" />
-              <div className="w-full aspect-square bg-zinc-700/50 rounded-sm" />
-              <div className="w-full aspect-square bg-zinc-700/50 rounded-sm" />
-            </div>
-            <div className="flex-1 flex flex-col gap-1.5 min-h-0">
-              <div className="grid grid-cols-2 gap-1.5 shrink-0">
-                <div className="h-10 bg-zinc-800 rounded-sm p-1.5 flex flex-col justify-between group-hover:scale-105 transition-transform">
-                  <div className="w-3 h-3 rounded-full bg-zinc-500/20 flex items-center justify-center text-zinc-500 text-[7px] group-hover:bg-zinc-500/40 transition-colors">$</div>
-                  <div className="w-8 h-0.5 bg-zinc-700 rounded-full group-hover:w-10 transition-all" />
-                </div>
-                <div className="h-10 bg-zinc-800 rounded-sm p-1.5 flex flex-col justify-between group-hover:scale-105 transition-transform delay-75">
-                  <div className="w-3 h-3 rounded-full bg-zinc-500/20 flex items-center justify-center text-zinc-500 text-[7px] group-hover:bg-zinc-500/40 transition-colors">%</div>
-                  <div className="w-6 h-0.5 bg-zinc-700 rounded-full group-hover:w-8 transition-all" />
-                </div>
-              </div>
-              <div className="flex-1 bg-zinc-800 rounded-sm relative overflow-hidden flex items-end justify-around p-1.5 pb-0 gap-0.5 group-hover:bg-zinc-700/50 transition-colors min-h-0">
-                <div className="w-full bg-zinc-500/60 h-[40%] group-hover:h-[75%] transition-all duration-500 ease-out rounded-t-sm cursor-pointer" />
-                <div className="w-full bg-zinc-700 h-[60%] group-hover:h-[35%] transition-all duration-500 ease-out delay-50 rounded-t-sm cursor-pointer" />
-                <div className="w-full bg-zinc-500/60 h-[30%] group-hover:h-[85%] transition-all duration-500 ease-out delay-100 rounded-t-sm cursor-pointer" />
-                <div className="w-full bg-zinc-700 h-[80%] group-hover:h-[45%] transition-all duration-500 ease-out delay-150 rounded-t-sm cursor-pointer" />
-                <div className="w-full bg-zinc-500/60 h-[50%] group-hover:h-[95%] transition-all duration-500 ease-out delay-200 rounded-t-sm cursor-pointer" />
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
+      visual: <PolishedImageVisual imageUrl="https://images.unsplash.com/photo-1618038483079-bfe64dcb17f1?auto=format&fit=crop&w=800&q=80" fallbackAlt="Fintech Dashboard Preview" />,
     },
     {
       id: 2,

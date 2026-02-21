@@ -34,6 +34,70 @@ const shimmerToReveal: Variants = {
   show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease } },
 };
 
+export interface PolishedImageVisualProps {
+  imageUrl?: string;
+  fallbackAlt?: string;
+}
+
+export function PolishedImageVisual({ imageUrl, fallbackAlt = 'Project Preview' }: PolishedImageVisualProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  return (
+    <div ref={ref} className="w-full h-full p-2 overflow-hidden relative group rounded-lg bg-zinc-950/40">
+      {/* Ambient glowing gradient background */}
+      <motion.div
+        className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700 blur-2xl pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.15), transparent 70%)',
+        }}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={inView ? { scale: 1, opacity: 0.4 } : {}}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
+      />
+
+      <div className="w-full h-full relative" style={{ perspective: '1000px' }}>
+        {inView ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, rotateX: 15, rotateY: -10 }}
+            animate={{ opacity: 1, scale: 0.9, rotateX: 5, rotateY: -5 }} // Zoomed out (scale: 0.9) with subtle 3D skew
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full h-full relative z-10 rounded-xl overflow-hidden shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-white/10 bg-zinc-900 group-hover:shadow-[0_30px_50px_-15px_rgba(139,92,246,0.3)] transition-all duration-500 ease-out group-hover:rotate-x-0 group-hover:rotate-y-0 group-hover:scale-95"
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            {/* Soft inner glow highlight */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none z-20" />
+
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={fallbackAlt}
+                className="w-full h-full object-cover sm:object-contain object-top"
+                loading="lazy"
+              />
+            ) : (
+              // Beautiful 3D skeleton fallback if no image is provided yet
+              <div className="w-full h-full flex items-center justify-center p-6 bg-zinc-900/80 backdrop-blur">
+                <div className="w-full h-full flex flex-col gap-3">
+                  <Skeleton className="w-full h-3/4 rounded-md" />
+                  <div className="flex gap-2">
+                    <Skeleton className="w-12 h-4 rounded" />
+                    <Skeleton className="w-24 h-4 rounded" />
+                  </div>
+                  <Skeleton className="w-full h-10 rounded mt-auto" />
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          <Skeleton className="w-full h-full" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+
 // ─── 1. PayPerRequest ──────────────────────────────────────────────────────────
 export function PayPerRequestVisual() {
   const ref = useRef<HTMLDivElement>(null);
