@@ -35,12 +35,4 @@ export const experience: ExperienceData[] = [
       'Led the product design for an AI-driven digital asset portfolio management platform. To solve the problem of fragmented crypto tracking, I designed a unified dashboard that seamlessly aggregates data from multiple exchanges (Binance, Coinbase, Kraken, etc.) via API integrations. My focus was on creating clear, nested graphical representations of portfolios and simplifying manual trading functions for digital coins and NFTs. I prioritized data visualization and intuitive UX to empower users with bias-free market analysis and real-time insights without needing multiple applications.',
     technologies: ['Figma', 'UI/UX Design', 'Data Visualization', 'Web3', 'Dashboard Design'],
   },
-  {
-    company: 'Apex Solutions',
-    role: 'UI/UX Designer',
-    period: '2018 - 2020',
-    description:
-      'Partnered with startups to launch MVPs. Handled end-to-end product lifecycle from initial sketches and wireframes to high-fidelity prototypes and developer handoff.',
-    technologies: ['Sketch', 'HTML/SCSS', 'JavaScript', 'Adobe XD'],
-  },
 ];
