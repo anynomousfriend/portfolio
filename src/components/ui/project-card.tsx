@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ExternalLink, Github } from 'lucide-react';
 import { TechIcon } from '@/components/ui/tech-icon';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,9 +9,41 @@ type ProjectCardProps = {
   project: ProjectData;
 };
 
+function CtaPills({ project }: { project: ProjectData }) {
+  const hasCtAs = project.liveUrl || project.githubUrl;
+  if (!hasCtAs) return null;
+
+  return (
+    <div className="flex gap-2 pt-3 px-1">
+      {project.liveUrl && (
+        <a
+          href={project.liveUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-primary/40 text-primary bg-primary/5 hover:bg-primary/15 hover:border-primary/70 transition-all duration-200"
+        >
+          <ExternalLink size={11} />
+          Live Demo
+        </a>
+      )}
+      {project.githubUrl && (
+        <a
+          href={project.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 hover:bg-muted/50 transition-all duration-200"
+        >
+          <Github size={11} />
+          GitHub
+        </a>
+      )}
+    </div>
+  );
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
-  const inner = (
-    <Card className="group relative overflow-hidden hover:border-border/80 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 flex flex-col h-full gap-0">
+  const cardBody = (
+    <Card className="group relative overflow-hidden hover:border-border/80 transition-all duration-500 flex flex-col h-full gap-0">
       {/* Visual area */}
       <div className="relative h-44 overflow-hidden shrink-0 -m-6 mb-0">{project.visual}</div>
 
@@ -45,13 +78,23 @@ export function ProjectCard({ project }: ProjectCardProps) {
     </Card>
   );
 
+  // Cards with a slug link the whole card — CTAs must live outside the <Link> to avoid nested <a> tags
   if (project.slug) {
     return (
-      <Link href={`/projects/${project.slug}`} className="block h-full">
-        {inner}
-      </Link>
+      <div className="flex flex-col h-full">
+        <Link href={`/projects/${project.slug}`} className="block flex-1">
+          {cardBody}
+        </Link>
+        <CtaPills project={project} />
+      </div>
     );
   }
 
-  return inner;
+  // No slug — no nested anchor conflict, render pills inside normally
+  return (
+    <div className="flex flex-col h-full">
+      {cardBody}
+      <CtaPills project={project} />
+    </div>
+  );
 }
