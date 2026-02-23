@@ -16,13 +16,15 @@ export function Footer() {
           </div>
           <div className="flex gap-6">
             {[
-              { label: 'GitHub', href: '#' },
-              { label: 'LinkedIn', href: '#' },
-              { label: 'Twitter', href: '#' },
+              { label: 'GitHub', href: 'https://github.com/anynomousfriend' },
+              { label: 'LinkedIn', href: 'https://www.linkedin.com/in/subh-choudhury/' },
+              { label: 'Twitter', href: 'https://x.com/SsubhankarX?t=S2s-0mx5Vex7yhfwe5iUng&s=09' },
             ].map((link) => (
               <a
                 key={link.label}
                 href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors duration-300 group"
               >
                 {link.label}

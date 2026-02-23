@@ -2,11 +2,15 @@ import type { ProjectData, ProjectCategory } from '@/types';
 import {
   PolishedImageVisual,
   PayPerRequestVisual,
+  IExecVisual,
   TemporalVaultVisual,
   ZKConsentVisual,
   ZenResumeVisual,
   LLMChessVisual,
-  IExecVisual,
+  AFOVisual,
+  FathomVisual,
+  PoolFundersVisual,
+  FoliobullVisual,
 } from '@/components/ui/project-visuals';
 
 export const projects: Record<ProjectCategory, ProjectData[]> = {
@@ -16,14 +20,16 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
       title: 'PoolFunders',
       desc: 'End-to-end product design for the world\'s first DeFi reward-based crowdfunding platform. Translates complex mechanisms—like staking $TPFT, DAO participation, and NFT rewards—into accessible, intuitive user flows.',
       tags: ['UI/UX', 'Figma', 'DeFi', 'Prototyping'],
-      visual: <PolishedImageVisual imageUrl="/poolfunder-cover.webp" fallbackAlt="PoolFunders Preview" />,
+      coverImage: '/poolfunder-cover.webp',
+      visual: <PolishedImageVisual imageUrl="/poolfunder-cover.webp" fallbackAlt="PoolFunders Preview" gradientColors={['#0f2027', '#203a43', '#2c5364']} hoverVisual={<PoolFundersVisual />} />,
     },
     {
       id: 2,
       title: 'Foliobull',
       desc: 'Product design for an AI-driven digital asset portfolio management platform. Features a unified dashboard aggregating multi-exchange data, nested graphical representations, and intuitive manual trading interfaces.',
       tags: ['Web3', 'Figma', 'Dashboard Design', 'Data Visualization'],
-      visual: <PolishedImageVisual imageUrl="/Foliobull-cover.webp" fallbackAlt="Foliobull Preview" />,
+      coverImage: '/Foliobull-cover.webp',
+      visual: <PolishedImageVisual imageUrl="/Foliobull-cover.webp" fallbackAlt="Foliobull Preview" gradientColors={['#0a0a1a', '#1a1a3e', '#0d2137']} hoverVisual={<FoliobullVisual />} />,
     },
   ],
   dev: [
@@ -84,11 +90,13 @@ Real-time payment tracking UI built with Wagmi, RainbowKit, and DaisyUI. Display
       id: 2,
       title: 'Temporal Vault',
       slug: 'temporal-vault',
+      liveUrl: 'https://temporal-vault-pied.vercel.app/',
       githubUrl: 'https://github.com/anynomousfriend/Temporal-Vault',
       githubRepo: 'anynomousfriend/Temporal-Vault',
       desc: 'Cross-chain DeFi protocol that tokenizes pending bridge claims as SIP-009 NFTs — trade your 15-20min Ethereum→Stacks wait time for instant liquidity at a 1-3% discount.',
       tags: ['Clarity', 'TypeScript', 'Next.js', 'Ethereum', 'Stacks', 'Viem'],
-      visual: <TemporalVaultVisual />,
+      visual: <PolishedImageVisual imageUrl="/temporal-vault.webp" fallbackAlt="Temporal Vault Preview" gradientColors={['#0f0c29', '#302b63', '#24243e']} hoverVisual={<TemporalVaultVisual />} />,
+      coverImage: '/temporal-vault.webp',
       caseStudy: `# Temporal Vault
 
 ## The Problem
@@ -146,7 +154,8 @@ React frontend integrating both Ethereum (Wagmi) and Stacks (Connect) wallets si
       githubRepo: 'anynomousfriend/ZK-parental-consent',
       desc: 'Privacy-preserving DApp on Midnight Network — zero-knowledge proofs let parents grant/revoke consent for minors without exposing child identity. COPPA/GDPR compliant.',
       tags: ['TypeScript', 'React', 'Docker', 'Node.js'],
-      visual: <ZKConsentVisual />,
+      visual: <PolishedImageVisual imageUrl="/zk-parental-consent.webp" fallbackAlt="ZK Parental Consent Preview" gradientColors={['#0a192f', '#112240', '#1d3461']} hoverVisual={<ZKConsentVisual />} />,
+      coverImage: '/zk-parental-consent.webp',
       caseStudy: `# ZK Parental Consent Gateway
 
 ## The Problem
@@ -197,11 +206,13 @@ npm run fund:wallet
       id: 4,
       title: 'ZenResume',
       slug: 'zen-resume',
+      liveUrl: 'https://zen-resume-phi.vercel.app/',
       githubUrl: 'https://github.com/anynomousfriend/zen-resume',
       githubRepo: 'anynomousfriend/zen-resume',
       desc: 'AI-powered resume builder with automated certificate extraction from 10+ platforms (Coursera, Credly, LinkedIn), multi-format export (PDF, LaTeX, DOCX), and a Japanese Zen design system.',
       tags: ['Next.js', 'TypeScript', 'Tailwind', 'shadcn/ui'],
-      visual: <ZenResumeVisual />,
+      visual: <PolishedImageVisual imageUrl="/ZenResume.webp" fallbackAlt="ZenResume Preview" gradientColors={['#1a1a2e', '#16213e', '#0f3460']} hoverVisual={<ZenResumeVisual />} />,
+      coverImage: '/ZenResume.webp',
       caseStudy: `# ZenResume
 
 ## The Problem
@@ -263,7 +274,8 @@ Inspired by Japanese aesthetics — MA (negative space), KANSO (simplicity), SHI
       githubRepo: 'anynomousfriend/LLM-Chess-Arena',
       desc: 'Experimental platform where 100+ LLM models (GPT-4, Claude, Llama, Mixtral) compete in chess matches — exposing AI reasoning through gameplay with real-time WebSocket updates.',
       tags: ['Python', 'React', 'TypeScript', 'Node.js'],
-      visual: <LLMChessVisual />,
+      visual: <PolishedImageVisual imageUrl="/chess-playground.webp" fallbackAlt="LLM Chess Arena Preview" gradientColors={['#0d1117', '#161b22', '#21262d']} hoverVisual={<LLMChessVisual />} />,
+      coverImage: '/chess-playground.webp',
       caseStudy: `# LLM Chess Arena
 
 ## The Idea
@@ -383,6 +395,96 @@ Automated scripts for app registration, TEE framework configuration (Scone), ord
 - Privacy-guaranteed serverless execution — even iExec cannot read your data
 - Decentralised alternative to AWS Lambda with cryptographic privacy proofs
 - Production deployment on Arbitrum Sepolia with public workerpool
+`,
+    },
+    {
+      id: 7,
+      title: 'AFO — Atomic Fair Ordering',
+      slug: 'afo-qubic',
+      liveUrl: 'https://afo-qubic.vercel.app/',
+      githubUrl: 'https://github.com/anynomousfriend/AFO---Atomic-Fair-Ordering-for-Qubic',
+      githubRepo: 'anynomousfriend/AFO---Atomic-Fair-Ordering-for-Qubic',
+      desc: 'MEV-elimination middleware for Qubic — a commit-reveal protocol that prevents sandwich attacks, frontrunning, and backrunning at 15.52M TPS scale.',
+      tags: ['TypeScript', 'C++', 'Next.js', 'Node.js'],
+      visual: <PolishedImageVisual imageUrl="/Qubic-afo.webp" fallbackAlt="AFO Qubic Preview" gradientColors={['#0a0a0a', '#1a0a2e', '#2d1b69']} hoverVisual={<AFOVisual />} />,
+      coverImage: '/Qubic-afo.webp',
+      caseStudy: `# AFO — Atomic Fair Ordering for Qubic
+
+## The Problem
+
+MEV (Maximal Extractable Value) attacks extract over $1.4B annually from DeFi users. Sandwich attacks, frontrunning, and backrunning manipulate transaction ordering to profit at the expense of legitimate users. Existing solutions like Flashbots only mitigate — they don't eliminate the problem.
+
+## The Solution
+
+AFO leverages Qubic's unique tick-based atomic finality to make transaction reordering mathematically impossible. A three-phase commit-reveal protocol locks ordering within Qubic's consensus tick.
+
+## What I Built
+
+### Commit-Reveal Protocol
+A cryptographic scheme where users submit hashed transaction commitments, then reveal the actual transaction data after the ordering window closes. The deterministic sorting algorithm uses timestamp + hash to ensure fairness.
+
+### Web App + Terminal UI
+Dual interface: a Next.js web app for visual demonstration and a terminal UI for developers. Both show real-time MEV attack simulations — with and without AFO protection.
+
+### AMM Integration
+Integrated automated market maker that demonstrates the practical impact: identical swaps executed with and without AFO show measurable price protection.
+
+## Technical Challenges
+
+**Unpredictable secondary sorting** — The key innovation is using the hash of the revealed transaction as a secondary sort key. Since attackers can't predict the hash before reveal, they can't game the ordering.
+
+## Impact
+
+- Zero MEV extraction — attacks are mathematically impossible, not just expensive
+- Designed for Qubic's 15.52M TPS throughput
+- Complete demo with attack simulation and protection verification
+`,
+    },
+    {
+      id: 8,
+      title: 'Fathom-0x Protocol',
+      slug: 'fathom-0x',
+      liveUrl: 'https://fathom-0x.vercel.app/',
+      githubUrl: 'https://github.com/anynomousfriend/Fathom-0x',
+      githubRepo: 'anynomousfriend/Fathom-0x',
+      desc: 'Privacy-preserving RAG on SUI blockchain — end-to-end encrypted document queries with on-chain proof verification, powered by Walrus decentralized storage.',
+      tags: ['TypeScript', 'Python', 'Move', 'Node.js'],
+      visual: <PolishedImageVisual imageUrl="/fathom-0x.webp" fallbackAlt="Fathom-0x Preview" gradientColors={['#0f2027', '#203a43', '#2c5364']} hoverVisual={<FathomVisual />} />,
+      coverImage: '/fathom-0x.webp',
+      caseStudy: `# Fathom-0x Protocol
+
+## The Problem
+
+AI-powered document search (RAG) requires sending sensitive documents to centralized servers. Healthcare records, legal contracts, and financial data are exposed to providers who can read, store, and leak them. There's no way to verify that the AI processed your query correctly.
+
+## The Solution
+
+Fathom-0x encrypts documents in the browser before upload, stores them on Walrus (SUI's decentralized storage), processes queries in Trusted Execution Environments, and records cryptographic proofs on-chain. Real AI — not keyword matching — with real privacy.
+
+## What I Built
+
+### End-to-End Encryption Pipeline
+AES-256-GCM encryption in the browser. Storage providers only see encrypted blobs. Keys never leave the client.
+
+### Oracle Network
+Oracle nodes process RAG queries inside TEEs (Trusted Execution Environments). Every answer is cryptographically signed — don't trust, verify.
+
+### SUI Smart Contracts
+Move contracts on SUI blockchain record document registrations, query submissions, and verification proofs. Complete audit trail of who accessed what and when.
+
+### Multi-Model Support
+Integrates GPT, Gemini, and local models for RAG queries. Not limited to toy models or simple keyword search.
+
+## Technical Challenges
+
+**Encrypted RAG** — Running semantic search over encrypted documents without decrypting on the server required a novel approach: the oracle decrypts inside the TEE, processes the query, and re-encrypts the response — all in an attested enclave.
+
+## Impact
+
+- Documents never exposed to any third party
+- Cryptographic proof of correct AI processing
+- Built for Walrus Haulout Hackathon — AI x Data track
+- Production-ready with healthcare, legal, and enterprise use cases
 `,
     },
   ],

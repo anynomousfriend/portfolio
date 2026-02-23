@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import type { Variants, Transition } from 'framer-motion';
 
 const ease = 'easeOut' as const;
@@ -9,9 +9,9 @@ const ease = 'easeOut' as const;
 // Shared skeleton shimmer element
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={`bg-zinc-800 rounded-sm overflow-hidden relative ${className}`}>
+    <div className={`bg-indigo-900/50 rounded-sm overflow-hidden relative ${className}`}>
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-600/30 to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/30 to-transparent"
         initial={{ x: '-100%' }}
         animate={{ x: '200%' }}
         transition={{ duration: 1.4, repeat: Infinity, ease: 'linear' } as Transition}
@@ -37,62 +37,89 @@ const shimmerToReveal: Variants = {
 export interface PolishedImageVisualProps {
   imageUrl?: string;
   fallbackAlt?: string;
+  gradientColors?: [string, string, string];
+  hoverVisual?: React.ReactNode;
 }
 
-export function PolishedImageVisual({ imageUrl, fallbackAlt = 'Project Preview' }: PolishedImageVisualProps) {
+export function PolishedImageVisual({
+  imageUrl,
+  fallbackAlt = 'Project Preview',
+  gradientColors = ['#1e1b4b', '#312e81', '#4c1d95'],
+  hoverVisual,
+}: PolishedImageVisualProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
+  const [hovered, setHovered] = useState(false);
+  const [c0, c1, c2] = gradientColors;
+  const showHover = hovered && !!hoverVisual;
 
   return (
-    <div ref={ref} className="w-full h-full p-2 overflow-hidden relative group rounded-lg bg-zinc-950/40">
-      {/* Ambient glowing gradient background */}
+    <div
+      ref={ref}
+      className="w-full h-full overflow-hidden relative group/cover"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Animated gradient background */}
       <motion.div
-        className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700 blur-2xl pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.15), transparent 70%)',
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(135deg, ${c0}, ${c1}, ${c2})` }}
+        animate={{
+          background: [
+            `linear-gradient(135deg, ${c0}, ${c1}, ${c2})`,
+            `linear-gradient(225deg, ${c1}, ${c2}, ${c0})`,
+            `linear-gradient(315deg, ${c2}, ${c0}, ${c1})`,
+            `linear-gradient(135deg, ${c0}, ${c1}, ${c2})`,
+          ],
         }}
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={inView ? { scale: 1, opacity: 0.4 } : {}}
-        transition={{ duration: 1.5, ease: 'easeOut' }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
       />
 
-      <div className="w-full h-full relative" style={{ perspective: '1000px' }}>
-        {inView ? (
+      {/* Skewed screenshot — fades out on hover */}
+      {imageUrl && (
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: showHover ? 0 : 1 } : {}}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, rotateX: 15, rotateY: -10 }}
-            animate={{ opacity: 1, scale: 0.9, rotateX: 5, rotateY: -5 }} // Zoomed out (scale: 0.9) with subtle 3D skew
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full h-full relative z-10 rounded-xl overflow-hidden shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-white/10 bg-zinc-900 group-hover:shadow-[0_30px_50px_-15px_rgba(139,92,246,0.3)] transition-all duration-500 ease-out group-hover:rotate-x-0 group-hover:rotate-y-0 group-hover:scale-95"
-            style={{ transformStyle: 'preserve-3d' }}
+            className="w-[88%] rounded-lg overflow-hidden shadow-2xl shadow-black/60 border border-white/10"
+            animate={{
+              transform: showHover
+                ? 'perspective(800px) rotateX(0deg) rotateY(0deg) rotate(0deg) scale(0.95)'
+                : 'perspective(800px) rotateX(6deg) rotateY(-6deg) rotate(-1deg) scale(1)',
+            }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Soft inner glow highlight */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none z-20" />
-
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={fallbackAlt}
-                className="w-full h-full object-cover sm:object-contain object-top"
-                loading="lazy"
-              />
-            ) : (
-              // Beautiful 3D skeleton fallback if no image is provided yet
-              <div className="w-full h-full flex items-center justify-center p-6 bg-zinc-900/80 backdrop-blur">
-                <div className="w-full h-full flex flex-col gap-3">
-                  <Skeleton className="w-full h-3/4 rounded-md" />
-                  <div className="flex gap-2">
-                    <Skeleton className="w-12 h-4 rounded" />
-                    <Skeleton className="w-24 h-4 rounded" />
-                  </div>
-                  <Skeleton className="w-full h-10 rounded mt-auto" />
-                </div>
-              </div>
-            )}
+            <img
+              src={imageUrl}
+              alt={fallbackAlt}
+              className="w-full h-full object-cover object-top"
+              loading="lazy"
+            />
           </motion.div>
-        ) : (
-          <Skeleton className="w-full h-full" />
+        </motion.div>
+      )}
+
+      {/* Hover visual — fades in on hover */}
+      <AnimatePresence>
+        {showHover && (
+          <motion.div
+            key="hover-visual"
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {hoverVisual}
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+
+      {/* Bottom fade */}
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
     </div>
   );
 }
@@ -831,6 +858,419 @@ export function IExecVisual() {
         >
           <span className="text-[6px] text-zinc-600 font-mono">50MB result limit</span>
           <span className="text-[6px] text-zinc-400 font-mono">privacy guaranteed</span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ─── 7. AFO — Atomic Fair Ordering ─────────────────────────────────────────────
+export function AFOVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  return (
+    <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
+      {/* header */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35 }}
+          className="flex items-center justify-between"
+        >
+          <span className="text-[7px] text-indigo-400 font-mono tracking-wider">AFO PROTOCOL</span>
+          <div className="flex items-center gap-1">
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full bg-green-400"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.4, repeat: Infinity }}
+            />
+            <span className="text-[6px] text-green-400 font-mono">MEV Protected</span>
+          </div>
+        </motion.div>
+      ) : (
+        <Skeleton className="h-2 w-3/4" />
+      )}
+
+      {/* Three phases */}
+      {inView ? (
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={container}
+          className="flex gap-1"
+        >
+          {[
+            { phase: 'COMMIT', color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
+            { phase: 'REVEAL', color: 'text-indigo-400', border: 'border-indigo-500/30', bg: 'bg-indigo-500/10' },
+            { phase: 'ORDER', color: 'text-green-400', border: 'border-green-500/30', bg: 'bg-green-500/10' },
+          ].map(({ phase, color, border, bg }) => (
+            <motion.div key={phase} variants={item} className={`flex-1 ${bg} border ${border} rounded-sm p-1.5 text-center`}>
+              <div className={`text-[6px] ${color} font-mono font-bold`}>{phase}</div>
+            </motion.div>
+          ))}
+        </motion.div>
+      ) : (
+        <Skeleton className="h-6" />
+      )}
+
+      {/* Transaction ordering visual */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
+          className="flex-1 bg-zinc-900 rounded-sm border border-zinc-800 p-2 font-mono text-[7px] flex flex-col gap-1"
+        >
+          <div className="text-zinc-600">{'// deterministic ordering'}</div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+            <span className="text-zinc-400">sort</span>
+            <span className="text-zinc-300">(timestamp + </span>
+            <span className="text-indigo-400">hash</span>
+            <span className="text-zinc-300">)</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}>
+            <span className="text-zinc-400">{'→'} </span>
+            <span className="text-green-400">fair order</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-zinc-600">
+            {'// MEV: impossible'}
+          </motion.div>
+        </motion.div>
+      ) : (
+        <Skeleton className="flex-1" />
+      )}
+
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+          className="flex justify-between"
+        >
+          <span className="text-[6px] text-zinc-600 font-mono">15.52M TPS</span>
+          <span className="text-[6px] text-zinc-400 font-mono">Qubic</span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ─── 8. Fathom-0x Protocol ─────────────────────────────────────────────────────
+export function FathomVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  return (
+    <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
+      {/* header */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35 }}
+          className="flex items-center justify-between"
+        >
+          <span className="text-[7px] text-cyan-400 font-mono tracking-wider">FATHOM-0x</span>
+          <span className="text-[6px] text-zinc-500 font-mono">SUI + Walrus</span>
+        </motion.div>
+      ) : (
+        <Skeleton className="h-2 w-3/4" />
+      )}
+
+      {/* Pipeline flow */}
+      {inView ? (
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={container}
+          className="flex items-center gap-1"
+        >
+          {[
+            { label: 'encrypt', icon: '🔒', border: 'border-cyan-500/30', bg: 'bg-cyan-500/10' },
+            { label: 'store', icon: '💾', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
+            { label: 'query', icon: '🤖', border: 'border-purple-500/30', bg: 'bg-purple-500/10' },
+            { label: 'verify', icon: '✓', border: 'border-green-500/30', bg: 'bg-green-500/10' },
+          ].map(({ label, icon, border, bg }, i) => (
+            <div key={label} className="flex items-center gap-1 flex-1">
+              <motion.div variants={item} className={`flex-1 ${bg} border ${border} rounded-sm p-1 text-center`}>
+                <div className="text-[8px]">{icon}</div>
+                <div className="text-[5px] text-zinc-400 font-mono">{label}</div>
+              </motion.div>
+              {i < 3 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + i * 0.15 }}
+                  className="text-zinc-600 text-[8px]"
+                >→</motion.div>
+              )}
+            </div>
+          ))}
+        </motion.div>
+      ) : (
+        <Skeleton className="h-10" />
+      )}
+
+      {/* Proof verification */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex-1 bg-zinc-900 rounded-sm border border-zinc-800 p-2 font-mono text-[7px] flex flex-col gap-0.5"
+        >
+          <div className="text-zinc-600">{'// on-chain proof'}</div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+            <span className="text-zinc-400">doc: </span>
+            <span className="text-cyan-400">AES-256-GCM</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}>
+            <span className="text-zinc-400">oracle: </span>
+            <span className="text-purple-400">TEE attested</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.0 }}>
+            <span className="text-zinc-400">proof: </span>
+            <span className="text-green-400">verified ✓</span>
+            <motion.span
+              className="inline-block w-0.5 h-2.5 bg-zinc-400 ml-0.5 align-middle"
+              animate={{ opacity: [1, 0] }}
+              transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
+            />
+          </motion.div>
+        </motion.div>
+      ) : (
+        <Skeleton className="flex-1" />
+      )}
+
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          className="flex justify-between"
+        >
+          <span className="text-[6px] text-zinc-600 font-mono">Privacy-preserving RAG</span>
+          <span className="text-[6px] text-zinc-400 font-mono">Don&apos;t trust, verify</span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ─── 9. PoolFunders ────────────────────────────────────────────────────────────
+export function PoolFundersVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  const pools = [
+    { label: 'DeFi Seed', raised: 68, goal: 100, color: 'bg-teal-500', accent: 'text-teal-400' },
+    { label: 'NFT Drop', raised: 91, goal: 100, color: 'bg-cyan-500', accent: 'text-cyan-400' },
+    { label: 'DAO Grant', raised: 42, goal: 100, color: 'bg-blue-500', accent: 'text-blue-400' },
+  ];
+
+  return (
+    <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
+      {/* top accent */}
+      <motion.div
+        className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500"
+        initial={{ scaleX: 0, originX: 0 }}
+        animate={inView ? { scaleX: 1 } : {}}
+        transition={{ duration: 0.6, ease }}
+      />
+
+      {/* header */}
+      <motion.div
+        className="flex items-center justify-between"
+        variants={container} initial="hidden" animate={inView ? 'show' : 'hidden'}
+      >
+        <motion.div variants={shimmerToReveal} className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+          <span className="text-[8px] font-bold text-zinc-300 font-mono tracking-widest">POOL FUNDERS</span>
+        </motion.div>
+        <motion.div variants={shimmerToReveal}>
+          <span className="text-[6px] text-teal-400 font-mono bg-teal-500/10 px-1.5 py-0.5 rounded border border-teal-500/20">DeFi crowdfunding</span>
+        </motion.div>
+      </motion.div>
+
+      {/* pool bars */}
+      <motion.div className="flex flex-col gap-1.5" variants={container} initial="hidden" animate={inView ? 'show' : 'hidden'}>
+        {pools.map(({ label, raised, color, accent }) => (
+          <motion.div key={label} variants={item} className="bg-zinc-900 rounded-sm p-1.5 border border-zinc-800">
+            <div className="flex justify-between mb-1">
+              <span className={`text-[6px] font-mono ${accent}`}>{label}</span>
+              <span className="text-[6px] text-zinc-500 font-mono">{raised}%</span>
+            </div>
+            <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full ${color} rounded-full`}
+                initial={{ width: 0 }}
+                animate={inView ? { width: `${raised}%` } : {}}
+                transition={{ duration: 0.8, ease, delay: 0.3 }}
+              />
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* staking reward box */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex-1 bg-zinc-900 rounded-sm border border-zinc-800 p-2 flex flex-col gap-1"
+        >
+          <div className="text-[6px] text-zinc-500 font-mono">staking rewards — $TPFT</div>
+          <div className="flex gap-1 flex-wrap mt-0.5">
+            {['Stake', 'DAO Vote', 'NFT Reward', 'Claim'].map((action, i) => (
+              <motion.span
+                key={action}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + i * 0.1 }}
+                className="text-[6px] font-mono bg-teal-500/10 text-teal-400 border border-teal-500/20 px-1 py-0.5 rounded"
+              >
+                {action}
+              </motion.span>
+            ))}
+          </div>
+          <div className="mt-auto flex justify-between">
+            <span className="text-[6px] text-zinc-600 font-mono">TVL locked</span>
+            <motion.span
+              className="text-[6px] text-teal-400 font-mono"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              $2.4M
+            </motion.span>
+          </div>
+        </motion.div>
+      ) : (
+        <Skeleton className="flex-1" />
+      )}
+
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.0 }}
+          className="flex justify-between"
+        >
+          <span className="text-[6px] text-zinc-600 font-mono">World&apos;s first DeFi crowdfunding</span>
+          <span className="text-[6px] text-zinc-400 font-mono">End-to-end design</span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ─── 10. Foliobull ─────────────────────────────────────────────────────────────
+export function FoliobullVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  const assets = [
+    { symbol: 'BTC', value: 42.1, change: +2.4, color: 'text-orange-400' },
+    { symbol: 'ETH', value: 18.7, change: -0.8, color: 'text-indigo-400' },
+    { symbol: 'SOL', value: 12.3, change: +5.1, color: 'text-purple-400' },
+  ];
+
+  return (
+    <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
+      {/* top accent */}
+      <motion.div
+        className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500"
+        initial={{ scaleX: 0, originX: 0 }}
+        animate={inView ? { scaleX: 1 } : {}}
+        transition={{ duration: 0.6, ease }}
+      />
+
+      {/* header */}
+      <motion.div
+        className="flex items-center justify-between"
+        variants={container} initial="hidden" animate={inView ? 'show' : 'hidden'}
+      >
+        <motion.div variants={shimmerToReveal} className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded-full bg-indigo-400" />
+          <span className="text-[8px] font-bold text-zinc-300 font-mono tracking-widest">FOLIOBULL</span>
+        </motion.div>
+        <motion.div variants={shimmerToReveal}>
+          <span className="text-[6px] text-indigo-400 font-mono bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">AI Portfolio</span>
+        </motion.div>
+      </motion.div>
+
+      {/* mini portfolio chart */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-zinc-900 rounded-sm border border-zinc-800 p-1.5"
+        >
+          <div className="text-[6px] text-zinc-500 font-mono mb-1">portfolio value — 7d</div>
+          <svg className="w-full h-8" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="fbgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d="M0 18 L10 16 L20 14 L30 17 L40 12 L50 10 L60 13 L70 8 L80 5 L90 7 L100 3 L100 24 L0 24 Z" fill="url(#fbgrad)" />
+            <motion.path
+              d="M0 18 L10 16 L20 14 L30 17 L40 12 L50 10 L60 13 L70 8 L80 5 L90 7 L100 3"
+              fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.0, delay: 0.3, ease }}
+            />
+          </svg>
+        </motion.div>
+      ) : (
+        <Skeleton className="h-12" />
+      )}
+
+      {/* asset rows */}
+      <motion.div className="flex flex-col gap-1" variants={container} initial="hidden" animate={inView ? 'show' : 'hidden'}>
+        {assets.map(({ symbol, value, change, color }) => (
+          <motion.div key={symbol} variants={item} className="flex items-center justify-between bg-zinc-900 rounded-sm px-2 py-1 border border-zinc-800">
+            <span className={`text-[7px] font-bold font-mono ${color}`}>{symbol}</span>
+            <div className="flex-1 mx-2 h-px bg-zinc-800" />
+            <span className="text-[6px] text-zinc-400 font-mono">{value}%</span>
+            <span className={`text-[6px] font-mono ml-1.5 ${change > 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {change > 0 ? '+' : ''}{change}%
+            </span>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* AI insight pill */}
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="flex-1 bg-zinc-900 rounded-sm border border-zinc-800 p-1.5 flex items-center gap-1.5"
+        >
+          <motion.div
+            className="w-1.5 h-1.5 rounded-full bg-purple-400"
+            animate={{ scale: [1, 1.4, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <span className="text-[6px] text-zinc-400 font-mono">AI rebalance suggestion: overweight ETH +3%</span>
+        </motion.div>
+      )}
+
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.0 }}
+          className="flex justify-between"
+        >
+          <span className="text-[6px] text-zinc-600 font-mono">Multi-exchange aggregation</span>
+          <span className="text-[6px] text-zinc-400 font-mono">Data visualization</span>
         </motion.div>
       )}
     </div>

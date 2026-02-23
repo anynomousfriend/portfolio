@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import type { ProjectCategory } from '@/types';
 
 export function ProjectsSection() {
-  const [activeTab, setActiveTab] = useState<ProjectCategory>('design');
+  const [activeTab, setActiveTab] = useState<ProjectCategory>('dev');
   const filteredProjects = projects[activeTab];
 
   return (

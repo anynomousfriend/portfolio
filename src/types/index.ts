@@ -43,6 +43,7 @@ export type ProjectData = {
   desc: string;
   tags: string[];
   visual: ReactNode;
+  coverImage?: string;
   slug?: string;
   githubUrl?: string;
   githubRepo?: string; // 'owner/repo' for README fetching

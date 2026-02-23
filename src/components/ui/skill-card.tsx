@@ -14,7 +14,7 @@ export function SkillCard({ skill }: SkillCardProps) {
   return (
     <Card
       ref={ref as React.RefObject<HTMLDivElement>}
-      className={`${skill.size} group hover:border-border/80 transition-all duration-500 overflow-hidden flex flex-col justify-between min-h-[200px]`}
+      className={`${skill.size} group hover:border-border/80 transition-all duration-300 overflow-hidden flex flex-col justify-between min-h-[200px]`}
     >
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
