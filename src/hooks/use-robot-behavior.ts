@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { Position, RobotExpression, WorkMode, WorkAction } from '@/types';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function useRobotBehavior() {
   const [mounted, setMounted] = useState(false);
@@ -199,6 +203,9 @@ export function useRobotBehavior() {
   // Handle click to move & hire badge interaction + high five detection
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      // Don't move robot while modal is open
+      if (modalOpenRef.current) return;
+
       const targetEl = e.target as HTMLElement;
       if (targetEl.closest('.robot-clickable')) return;
 
@@ -223,31 +230,33 @@ export function useRobotBehavior() {
         return;
       }
 
-      // ─── High Five detection ───────────────────────────────────────────────
-      // Only count rapid clicks when not in work mode
-      if (workMode === 'none') {
-        const now = Date.now();
-        // Keep only timestamps within the last 600ms
-        highFiveTimestampsRef.current = highFiveTimestampsRef.current.filter(
-          (t) => now - t < 600
-        );
-        highFiveTimestampsRef.current.push(now);
+      // Always reset workMode on any click so the robot can always be moved.
+      // This handles the case where ScrollSmoother prevents scroll events from
+      // firing and workMode gets stuck in 'commuting' / 'working'.
+      setWorkMode('none');
+      setWorkAction('none');
 
-        if (highFiveTimestampsRef.current.length >= 3) {
-          // Trigger high five!
-          highFiveTimestampsRef.current = [];
-          const offsetX = 50;
-          const offsetY = 50;
-          const targetX = Math.min(Math.max(e.clientX + offsetX, 50), window.innerWidth - 50);
-          const targetY = Math.min(Math.max(e.clientY + offsetY, 50), window.innerHeight - 50);
-          setTarget({ x: targetX, y: targetY });
-          setIsMoving(true);
-          setIsCatching(false);
-          setWorkMode('none');
-          highFiveWorkActionRef.current = 'highfive';
-          setExpression('run');
-          return;
-        }
+      // ─── High Five detection ───────────────────────────────────────────────
+      const now = Date.now();
+      // Keep only timestamps within the last 600ms
+      highFiveTimestampsRef.current = highFiveTimestampsRef.current.filter(
+        (t) => now - t < 600
+      );
+      highFiveTimestampsRef.current.push(now);
+
+      if (highFiveTimestampsRef.current.length >= 3) {
+        // Trigger high five!
+        highFiveTimestampsRef.current = [];
+        const offsetX = 50;
+        const offsetY = 50;
+        const targetX = Math.min(Math.max(e.clientX + offsetX, 50), window.innerWidth - 50);
+        const targetY = Math.min(Math.max(e.clientY + offsetY, 50), window.innerHeight - 50);
+        setTarget({ x: targetX, y: targetY });
+        setIsMoving(true);
+        setIsCatching(false);
+        highFiveWorkActionRef.current = 'highfive';
+        setExpression('run');
+        return;
       }
 
       // Normal click-to-move
@@ -258,16 +267,17 @@ export function useRobotBehavior() {
       setTarget({ x: targetX, y: targetY });
       setIsMoving(true);
       setIsCatching(false);
-      setWorkMode('none');
-      setWorkAction('none');
       setExpression('run');
     };
 
     window.addEventListener('click', handleClick);
     return () => window.removeEventListener('click', handleClick);
-  }, [workMode]);
+  }, []);
 
   // Handle scroll to hop off hire badge
+  // Uses ScrollTrigger.addEventListener which works with GSAP ScrollSmoother
+  // (ScrollSmoother intercepts native scroll via CSS transform, so window 'scroll'
+  //  events are unreliable — ScrollTrigger's own scroll events always fire)
   useEffect(() => {
     const handleScroll = () => {
       if (workMode !== 'none') {
@@ -283,8 +293,15 @@ export function useRobotBehavior() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // ScrollTrigger fires on both native scroll and ScrollSmoother-driven scroll
+    ScrollTrigger.addEventListener('scrollStart', handleScroll);
+    // Also keep the native listener as a fallback (e.g. on pages without ScrollSmoother)
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      ScrollTrigger.removeEventListener('scrollStart', handleScroll);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [workMode]);
 
   // Robot click handler (love reaction with multi-click detection)
@@ -365,9 +382,97 @@ export function useRobotBehavior() {
     }
   }, [isMoving]);
 
+  // ─── Celebrate: fired when contact form is successfully sent ─────────────────
+  useEffect(() => {
+    const handleCelebrate = () => {
+      setWorkMode('none');
+      setWorkAction('none');
+      setExpression('love-overload');
+      setTimeout(() => setExpression('dance'), 1000);
+      setTimeout(() => setExpression('happy'), 4000);
+      setTimeout(() => setExpression((prev) => prev === 'happy' ? 'idle' : prev), 6000);
+    };
+    window.addEventListener('robot:celebrate', handleCelebrate);
+    return () => window.removeEventListener('robot:celebrate', handleCelebrate);
+  }, []);
+
+  // ─── Modal observer: move robot to left edge to peek at the form ─────────────
+  const modalOpenRef = useRef(false);
+  const observeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleModalOpen = (e: Event) => {
+      modalOpenRef.current = true;
+
+      // Position robot just outside the left edge of the modal, at its bottom
+      // The modal detail gives us {left, bottom} of the popover's bounding rect
+      const detail = (e as CustomEvent).detail as { left: number; bottom: number } | null;
+      // Sit 90px to the left of the modal's left edge so it's clearly outside
+      const targetX = detail ? Math.max(detail.left - 90, 50) : 50;
+      const targetY = detail ? Math.min(detail.bottom + 10, window.innerHeight - 50) : window.innerHeight - 100;
+
+      setTarget({ x: targetX, y: targetY });
+      setIsMoving(true);
+      setIsCatching(false);
+      setWorkMode('none');
+      setWorkAction('none');
+      setFacingRight(true); // face right toward the modal
+
+      // After arriving, switch to excited expression
+      observeTimerRef.current = setTimeout(() => {
+        if (modalOpenRef.current) setExpression('excited');
+      }, 900);
+    };
+
+    const handleModalClose = () => {
+      modalOpenRef.current = false;
+      if (observeTimerRef.current) {
+        clearTimeout(observeTimerRef.current);
+        observeTimerRef.current = null;
+      }
+      setExpression('idle');
+    };
+
+    // Each field focus → love-overload for 1.5s then back to excited
+    const handleInputFocus = () => {
+      if (!modalOpenRef.current) return;
+      setExpression('love-overload');
+      setFacingRight(true);
+      if (observeTimerRef.current) clearTimeout(observeTimerRef.current);
+      observeTimerRef.current = setTimeout(() => {
+        if (modalOpenRef.current) setExpression('excited');
+      }, 1500);
+    };
+
+    let typingDebounce: ReturnType<typeof setTimeout> | null = null;
+    const handleInputTyping = () => {
+      if (!modalOpenRef.current) return;
+      if (typingDebounce) clearTimeout(typingDebounce);
+      typingDebounce = setTimeout(() => {
+        if (modalOpenRef.current) {
+          setExpression('love-overload');
+          setFacingRight(true);
+        }
+      }, 400);
+    };
+
+    window.addEventListener('robot:modal-open', handleModalOpen);
+    window.addEventListener('robot:modal-close', handleModalClose);
+    window.addEventListener('robot:input-focus', handleInputFocus);
+    window.addEventListener('robot:input-typing', handleInputTyping);
+    return () => {
+      window.removeEventListener('robot:modal-open', handleModalOpen);
+      window.removeEventListener('robot:modal-close', handleModalClose);
+      window.removeEventListener('robot:input-focus', handleInputFocus);
+      window.removeEventListener('robot:input-typing', handleInputTyping);
+      if (observeTimerRef.current) clearTimeout(observeTimerRef.current);
+      if (typingDebounce) clearTimeout(typingDebounce);
+    };
+  }, []);
+
   // Proximity check (butterfly catching)
   useEffect(() => {
-    if (isMoving || workMode !== 'none' || expression === 'love' || expression === 'shy') return;
+    if (isMoving || workMode !== 'none' || expression === 'love' || expression === 'shy' || modalOpenRef.current) return;
 
     const dx = mousePos.x - pos.x;
     const dy = mousePos.y - pos.y;
@@ -390,7 +495,7 @@ export function useRobotBehavior() {
   // Idle behaviors
   useEffect(() => {
     let idleTimer: ReturnType<typeof setTimeout>;
-    if (!isMoving && !isCatching && workMode === 'none' && expression === 'idle') {
+    if (!isMoving && !isCatching && workMode === 'none' && expression === 'idle' && !modalOpenRef.current) {
       idleTimer = setTimeout(() => {
         const rand = Math.random();
         // Night owl: double yawn probability
