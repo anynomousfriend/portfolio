@@ -123,21 +123,31 @@ export function ExperienceSection() {
         </p>
       </div>
 
-      <div className="relative pl-4 md:pl-0">
-        {/* Vertical Base Line */}
-        <div className="absolute left-[19px] md:left-0 top-2 bottom-0 w-px bg-border" />
+      {/* Timeline: line + items share the same coordinate space */}
+      <div className="relative">
+        {/* Vertical Base Line — sits at x=20px */}
+        <div className="absolute left-5 top-2 bottom-0 w-px bg-border" />
 
-        <div ref={itemsRef} className="space-y-12">
+        <div className="space-y-12" ref={itemsRef}>
           {experience.map((job, index) => (
-            <div key={index} className="group relative pl-12 md:pl-10 transition-all duration-500">
+            <div key={index} className="group relative flex gap-8 transition-all duration-500">
 
-              {/* Timeline Node (Diamond) */}
-              <div className="absolute left-[14px] md:left-[-5px] top-2.5 w-[11px] h-[11px] bg-background border-2 border-muted-foreground rotate-45 group-hover:bg-primary/20 group-hover:border-primary transition-all duration-300 z-10 shadow-[0_0_0_4px_var(--background)]" />
+              {/* Left column: diamond + highlight line, fixed width 40px */}
+              <div className="relative shrink-0 w-10">
+                {/* Diamond centered at x=20px (left: 50% - 5.5px ≈ left-[14.5px]) */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-2.5 w-[11px] h-[11px] bg-background border-2 border-muted-foreground rotate-45 group-hover:bg-primary/20 group-hover:border-primary transition-all duration-300 z-10 shadow-[0_0_0_4px_var(--background)]" />
 
-              {/* Connecting Highlight Line */}
-              {index !== experience.length - 1 && (
-                <div className="absolute left-[19px] md:left-0 top-[22px] bottom-[-48px] w-px bg-primary origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-700 ease-in-out" />
-              )}
+                {/* Connecting Highlight Line — centered under diamond */}
+                {index !== experience.length - 1 && (
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 top-[22px] bottom-[-48px] w-px bg-primary origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-700 ease-in-out"
+                    style={{ boxShadow: '0 0 6px 2px rgba(99,102,241,0.7), 0 0 16px 4px rgba(99,102,241,0.35)' }}
+                  />
+                )}
+              </div>
+
+              {/* Right column: content */}
+              <div className="flex-1 pb-2">
 
               <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1.5 gap-2">
                 <div className="flex items-center gap-2">
@@ -175,6 +185,7 @@ export function ExperienceSection() {
                   <TechBadge key={i} tech={tech} />
                 ))}
               </div>
+              </div>{/* end right column */}
             </div>
           ))}
         </div>

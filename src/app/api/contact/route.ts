@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     const { error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: 'officialsubhankar01@gmail.com',
+      replyTo: email,
       subject: `New message from ${name} — Portfolio`,
       html: `
         <!DOCTYPE html>
@@ -33,11 +34,13 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
+      console.error('[Resend error]', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
+    console.error('[Contact route error]', err);
     return NextResponse.json({ error: 'Failed to send email.' }, { status: 500 });
   }
 }
