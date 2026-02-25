@@ -15,9 +15,9 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     smootherRef.current = ScrollSmoother.create({
       wrapper: '#smooth-wrapper',
       content: '#smooth-content',
-      smooth: 1,           // seconds to "catch up" to the native scroll position
-      effects: true,       // enables data-speed and data-lag attribute support
-      smoothTouch: 0.1,    // light smoothing on touch devices (default is none)
+      smooth: 1.5,
+      effects: true,
+      smoothTouch: 0.1,
     });
 
     return () => {

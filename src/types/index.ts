@@ -39,6 +39,7 @@ export type SkillData = {
 
 export type ProjectData = {
   id: number;
+  featured?: boolean;
   title: string;
   desc: string;
   tags: string[];

@@ -11,10 +11,10 @@ export default function Home() {
       <Navbar />
       <main className="bg-[var(--background)] text-[var(--foreground)]">
         <HeroSection />
+        <ProjectsSection />
         <PinnedBioSection />
         <SkillsSection />
         <ExperienceSection />
-        <ProjectsSection />
       </main>
       <Footer />
     </>

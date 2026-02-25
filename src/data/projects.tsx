@@ -26,7 +26,7 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
     {
       id: 2,
       title: 'Foliobull',
-      desc: 'Product design for an AI-driven digital asset portfolio management platform. Features a unified dashboard aggregating multi-exchange data, nested graphical representations, and intuitive manual trading interfaces.',
+      desc: 'Product design for a digital asset portfolio management platform. Features a unified dashboard aggregating multi-exchange data, nested graphical representations, and intuitive manual trading interfaces.',
       tags: ['Web3', 'Figma', 'Dashboard Design', 'Data Visualization'],
       coverImage: '/Foliobull-cover.webp',
       visual: <PolishedImageVisual imageUrl="/Foliobull-cover.webp" fallbackAlt="Foliobull Preview" gradientColors={['#0a0a1a', '#1a1a3e', '#0d2137']} hoverVisual={<FoliobullVisual />} />,
@@ -35,6 +35,7 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
   dev: [
     {
       id: 1,
+      featured: true,
       title: 'PayPerRequest',
       slug: 'pay-per-request',
       githubUrl: 'https://github.com/anynomousfriend/payperrequest',
@@ -88,6 +89,7 @@ Real-time payment tracking UI built with Wagmi, RainbowKit, and DaisyUI. Display
     },
     {
       id: 2,
+      featured: true,
       title: 'Temporal Vault',
       slug: 'temporal-vault',
       liveUrl: 'https://temporal-vault-pied.vercel.app/',
@@ -442,6 +444,7 @@ Integrated automated market maker that demonstrates the practical impact: identi
     },
     {
       id: 8,
+      featured: true,
       title: 'Fathom-0x Protocol',
       slug: 'fathom-0x',
       liveUrl: 'https://fathom-0x.vercel.app/',
