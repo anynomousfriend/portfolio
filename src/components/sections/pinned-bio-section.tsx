@@ -65,14 +65,16 @@ export function PinnedBioSection() {
 
     // ScrollSmoother must exist before we create any scrollTrigger with its scroller.
     // SmoothScrollProvider dispatches 'smoothscroller:ready' after ScrollSmoother.create().
+    const deferredSetup = () => setTimeout(setupAnimations, 0);
+
     if (ScrollSmoother.get()) {
-      setupAnimations();
+      setTimeout(setupAnimations, 0);
     } else {
-      window.addEventListener('smoothscroller:ready', setupAnimations, { once: true });
+      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
     }
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', setupAnimations);
+      window.removeEventListener('smoothscroller:ready', deferredSetup);
       ctx.revert();
     };
   }, []);

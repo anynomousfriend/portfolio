@@ -36,14 +36,18 @@ export function Navbar() {
 
     // Defer until ScrollSmoother is ready — ScrollTrigger.create() must not be
     // called before SmoothScrollProvider's useEffect runs ScrollSmoother.create().
+    // Additionally, wrap every call in setTimeout(fn, 0) so it always runs in a
+    // fresh macrotask, after ScrollSmoother's scroller proxy is fully usable.
+    const deferredSetup = () => setTimeout(setupScrollTrigger, 0);
+
     if (ScrollSmoother.get()) {
-      setupScrollTrigger();
+      setTimeout(setupScrollTrigger, 0);
     } else {
-      window.addEventListener('smoothscroller:ready', setupScrollTrigger, { once: true });
+      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
     }
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', setupScrollTrigger);
+      window.removeEventListener('smoothscroller:ready', deferredSetup);
       st?.kill();
     };
   }, []);

@@ -106,15 +106,17 @@ export function HeroSection() {
       });
     };
 
+    const deferredSetup = () => setTimeout(setupScrollBlurOut, 0);
+
     if (ScrollSmoother.get()) {
       // Smoother already exists (e.g. HMR / Strict Mode second mount)
-      setupScrollBlurOut();
+      setTimeout(setupScrollBlurOut, 0);
     } else {
-      window.addEventListener('smoothscroller:ready', setupScrollBlurOut, { once: true });
+      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
     }
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', setupScrollBlurOut);
+      window.removeEventListener('smoothscroller:ready', deferredSetup);
       ctx.revert();
     };
   }, []);
