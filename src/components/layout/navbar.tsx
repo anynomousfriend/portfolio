@@ -8,7 +8,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
-gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+// ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
+// Do NOT call registerPlugin here.
 
 export function Navbar() {
   const navRef = useRef<HTMLElement>(null);
@@ -19,18 +20,32 @@ export function Navbar() {
     const nav = navRef.current;
     if (!nav) return;
 
-    // Use ScrollTrigger to toggle the scrolled state — this works correctly
-    // with ScrollSmoother since GSAP proxies all scroll through ScrollTrigger.
-    // We match the hero dock animation: trigger is the hero section, end is
-    // 'bottom top', so the navbar solidifies exactly when the name finishes docking.
-    const st = ScrollTrigger.create({
-      trigger: '#hero-name',
-      start: 'bottom 60%', // navbar solidifies as the name approaches its dock position
-      onEnter: () => nav.setAttribute('data-scrolled', 'true'),
-      onLeaveBack: () => nav.setAttribute('data-scrolled', 'false'),
-    });
+    let st: ReturnType<typeof ScrollTrigger.create> | null = null;
 
-    return () => st.kill();
+    const setupScrollTrigger = () => {
+      if (!navRef.current) return;
+      // Use ScrollTrigger to toggle the scrolled state — this works correctly
+      // with ScrollSmoother since GSAP proxies all scroll through ScrollTrigger.
+      st = ScrollTrigger.create({
+        trigger: '#hero-name',
+        start: 'bottom 60%',
+        onEnter: () => nav.setAttribute('data-scrolled', 'true'),
+        onLeaveBack: () => nav.setAttribute('data-scrolled', 'false'),
+      });
+    };
+
+    // Defer until ScrollSmoother is ready — ScrollTrigger.create() must not be
+    // called before SmoothScrollProvider's useEffect runs ScrollSmoother.create().
+    if (ScrollSmoother.get()) {
+      setupScrollTrigger();
+    } else {
+      window.addEventListener('smoothscroller:ready', setupScrollTrigger, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('smoothscroller:ready', setupScrollTrigger);
+      st?.kill();
+    };
   }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {

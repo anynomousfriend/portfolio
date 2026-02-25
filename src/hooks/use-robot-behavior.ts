@@ -4,7 +4,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { Position, RobotExpression, WorkMode, WorkAction } from '@/types';
 
-gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
+// Do NOT call registerPlugin here.
 
 export function useRobotBehavior() {
   const [mounted, setMounted] = useState(false);

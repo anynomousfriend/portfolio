@@ -8,6 +8,11 @@ import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+// ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
+// Do NOT call registerPlugin here — re-registering ScrollTrigger alone after
+// ScrollSmoother has already paired with it corrupts GSAP's internal plugin
+// state and causes "_gsap" to be undefined at animation time.
+
 // Inline tech pill — icon + label, used inside the value-prop sentence
 function InlineTech({ name }: { name: string }) {
   return (
@@ -62,29 +67,56 @@ export function HeroSection() {
           // Remove will-change after entrance — restores preserve-3d for folder
           fadeElements.forEach(el => { el.style.willChange = 'auto'; });
         });
-
-      // ── Scroll blur-out ───────────────────────────────────────────────────
-      // Use gsap.to (not fromTo) so the from-state is always the live value,
-      // preventing a snap if the user scrolls before entrance finishes.
-      // scroller must point at #smooth-wrapper — window scroll is always 0.
-      // toggleActions is omitted — scrub reverses automatically by scroll position.
-      gsap.to(fadeElements, {
-        opacity: 0.15,
-        y: -10,
-        filter: 'blur(10px)',
-        ease: 'none',
-        stagger: 0.08,
-        scrollTrigger: {
-          trigger: section,
-          scroller: '#smooth-wrapper',
-          start: 'bottom 90%',
-          end: 'bottom 5%',
-          scrub: true,
-        },
-      });
     }, sectionRef);
 
-    return () => ctx.revert();
+    // ── Scroll blur-out ───────────────────────────────────────────────────
+    // This animation uses scroller: '#smooth-wrapper', which requires
+    // ScrollSmoother to have called ScrollSmoother.create() first so that its
+    // scroll proxy is registered with ScrollTrigger. However, React runs child
+    // useEffects BEFORE parent useEffects, so SmoothScrollProvider's
+    // ScrollSmoother.create() hasn't run yet when HeroSection mounts.
+    // We defer this tween until the 'smoothscroller:ready' event fires.
+    // The { once: true } option ensures the listener is auto-removed after
+    // firing, and the ScrollSmoother.get() check handles HMR / fast-refresh
+    // cases where the smoother was already created before this effect ran.
+    const setupScrollBlurOut = () => {
+      // Guard: if ctx was already reverted (component unmounted before the
+      // event fired) we must not create new tweens.
+      if (!sectionRef.current) return;
+
+      ctx.add(() => {
+        // Use gsap.to (not fromTo) so the from-state is always the live value,
+        // preventing a snap if the user scrolls before entrance finishes.
+        // scroller must point at #smooth-wrapper — window scroll is always 0.
+        // toggleActions is omitted — scrub reverses automatically by scroll position.
+        gsap.to(fadeElements, {
+          opacity: 0.15,
+          y: -10,
+          filter: 'blur(10px)',
+          ease: 'none',
+          stagger: 0.08,
+          scrollTrigger: {
+            trigger: section,
+            scroller: '#smooth-wrapper',
+            start: 'bottom 90%',
+            end: 'bottom 5%',
+            scrub: true,
+          },
+        });
+      });
+    };
+
+    if (ScrollSmoother.get()) {
+      // Smoother already exists (e.g. HMR / Strict Mode second mount)
+      setupScrollBlurOut();
+    } else {
+      window.addEventListener('smoothscroller:ready', setupScrollBlurOut, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('smoothscroller:ready', setupScrollBlurOut);
+      ctx.revert();
+    };
   }, []);
 
   return (
