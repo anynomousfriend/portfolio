@@ -13,10 +13,15 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
   const smootherRef = useRef<ScrollSmoother | null>(null);
 
   useEffect(() => {
-    // Kill any existing smoother/triggers first — handles React Strict Mode's
-    // double-invocation of effects (mount → unmount → mount) which would
-    // otherwise leave a stale ScrollSmoother instance whose DOM nodes are no
-    // longer children of the current tree, triggering the "removeChild" error.
+    // Reset FIRST — increments the generation counter, instantly invalidating
+    // any in-flight setTimeout callbacks from the previous mount cycle.
+    // This is the critical fix for React Strict Mode: without this, macrotasks
+    // scheduled by the first mount's signalSmootherReady() fire AFTER the
+    // second mount's ScrollTrigger.killAll() but BEFORE ScrollSmoother.create(),
+    // hitting a dead scroller proxy and crashing with _gsap undefined.
+    resetSmootherReady();
+
+    // Kill any existing smoother/triggers — handles Strict Mode double-invoke.
     ScrollSmoother.get()?.kill();
     ScrollTrigger.killAll();
 
