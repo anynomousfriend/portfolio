@@ -56,13 +56,13 @@ export function PolishedImageVisual({
   return (
     <div
       ref={ref}
-      className="w-full h-full overflow-hidden relative group/cover"
+      className="w-full h-full overflow-hidden relative group/cover cursor-pointer bg-zinc-950"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Animated gradient background */}
+      {/* Background Gradient */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-40"
         style={{ background: `linear-gradient(135deg, ${c0}, ${c1}, ${c2})` }}
         animate={{
           background: [
@@ -72,54 +72,76 @@ export function PolishedImageVisual({
             `linear-gradient(135deg, ${c0}, ${c1}, ${c2})`,
           ],
         }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
       />
 
-      {/* Skewed screenshot — fades out on hover */}
-      {imageUrl && (
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: showHover ? 0 : 1 } : {}}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        >
+      {/* Folder Back */}
+      <div className="absolute inset-0 flex items-center justify-center p-6">
+        <div className="relative w-full h-full max-w-[280px] max-h-[180px]">
+          {/* The "Sheet" (Image) */}
           <motion.div
-            className="w-[88%] rounded-lg overflow-hidden shadow-2xl shadow-black/60 border border-white/10"
+            className="absolute inset-0 z-10 shadow-2xl"
+            initial={{ y: 0, scale: 1 }}
             animate={{
-              transform: showHover
-                ? 'perspective(800px) rotateX(0deg) rotateY(0deg) rotate(0deg) scale(0.95)'
-                : 'perspective(800px) rotateX(6deg) rotateY(-6deg) rotate(-1deg) scale(1)',
+              y: hovered ? -25 : 0,
+              scale: hovered ? 1.05 : 1,
+              rotate: hovered ? -2 : 0,
+              opacity: showHover ? 0 : 1,
             }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            <img
-              src={imageUrl}
-              alt={fallbackAlt}
-              className="w-full h-full object-cover object-top"
-              loading="lazy"
-            />
+            <div className="w-full h-full rounded-lg overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={fallbackAlt}
+                  className="w-full h-full object-cover object-top"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-zinc-800">
+                  <span className="text-zinc-500 text-xs">No Preview</span>
+                </div>
+              )}
+            </div>
           </motion.div>
-        </motion.div>
-      )}
+
+          {/* Folder Front Flap (Lower half) */}
+          <motion.div 
+            className="absolute bottom-0 left-0 right-0 h-[60%] bg-white/5 backdrop-blur-md rounded-b-lg border-x border-b border-white/10 z-20 pointer-events-none"
+            animate={{
+              rotateX: hovered ? -15 : 0,
+              y: hovered ? 5 : 0,
+            }}
+            style={{ transformOrigin: 'bottom' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            {/* Folder Tab */}
+            <div className="absolute -top-3 left-4 w-16 h-4 bg-white/10 backdrop-blur-md rounded-t-md border-t border-x border-white/10" />
+            
+            {/* Front details */}
+            <div className="absolute inset-0 flex flex-col justify-end p-4">
+              <div className="w-1/2 h-1 bg-white/10 rounded-full mb-2" />
+              <div className="w-1/3 h-1 bg-white/5 rounded-full" />
+            </div>
+          </motion.div>
+        </div>
+      </div>
 
       {/* Hover visual — fades in on hover */}
       <AnimatePresence>
         {showHover && (
           <motion.div
             key="hover-visual"
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-30"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             {hoverVisual}
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
     </div>
   );
 }

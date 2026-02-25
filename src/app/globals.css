@@ -139,6 +139,40 @@
   }
 }
 
+@keyframes shine {
+  to {
+    transform: translateX(150%) skewX(-12deg);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Utilities */
+@utility mask-image-radial-fade {
+  mask-image: radial-gradient(circle at center, black 0%, transparent 60%);
+  -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 60%);
+}
+
+@utility perspective-* {
+  perspective: --value(length);
+}
+
+@utility transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+@utility translate-z-* {
+  transform: translateZ(--value(length));
+}
+
+@utility bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+
 /* Robot Keyframes */
 
 @keyframes leg-swing {

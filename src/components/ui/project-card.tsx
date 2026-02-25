@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { ExternalLink, Github, Star } from 'lucide-react';
 import { TechIcon } from '@/components/ui/tech-icon';
@@ -45,7 +47,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const cardBody = (
     <Card className="group relative overflow-hidden hover:border-border/80 transition-all duration-500 flex flex-col h-full gap-0">
       {/* Visual area — rendered first so the badge paints on top via DOM order */}
-      <div className="relative h-44 overflow-hidden shrink-0 -m-6 mb-0">{project.visual}</div>
+      <div className="relative h-48 overflow-visible shrink-0 -m-6 mb-0">{project.visual}</div>
       {/* Featured badge — after visual in DOM so it stacks above it */}
       {project.featured && (
         <div className="absolute top-3 right-3 z-30 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 backdrop-blur-sm">
@@ -67,7 +69,25 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* Tech Stack Icons */}
       <CardFooter className="flex flex-wrap gap-1.5 pt-0 pb-4 mt-auto border-t">
         {project.tags.map((tag, i) => (
-          <div key={i} className="group/icon relative">
+          <div
+            key={i}
+            className="group/icon relative"
+            onMouseEnter={(e) => {
+              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+              window.dispatchEvent(
+                new CustomEvent('robot:techbadge', {
+                  detail: {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2,
+                    tech: tag,
+                  },
+                })
+              );
+            }}
+            onMouseLeave={() => {
+              window.dispatchEvent(new CustomEvent('robot:techbadge:leave'));
+            }}
+          >
             <Badge
               variant="outline"
               className="p-1.5 hover:border-primary/50 hover:bg-primary/10 transition-all duration-300 cursor-help"

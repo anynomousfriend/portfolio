@@ -87,9 +87,6 @@ export function ProjectsSection() {
         {/* Header */}
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8 mb-12">
           <div>
-            <p className="text-xs font-mono tracking-[0.2em] uppercase text-indigo-400/70 mb-3">
-              — Highlight Reel
-            </p>
             <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 tracking-tight">
               Selected Work<span className="text-primary">.</span>
             </h2>

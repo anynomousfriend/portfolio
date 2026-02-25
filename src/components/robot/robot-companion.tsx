@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRobotBehavior } from '@/hooks/use-robot-behavior';
 import { RobotSVG } from './robot-svg';
 import { ConfettiBurst } from './confetti-burst';
@@ -9,6 +10,8 @@ import { ConfettiBurst } from './confetti-burst';
 export function RobotCompanion() {
   const {
     pos,
+    bubbles,
+    certificateWow,
     isMoving,
     isCatching,
     facingRight,
@@ -83,8 +86,57 @@ export function RobotCompanion() {
               😳 eep!
             </div>
           )}
+
+          {/* Certificate Wow tooltip */}
+          <AnimatePresence>
+            {certificateWow && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.8 }}
+                className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-popover text-[11px] font-bold text-primary px-3 py-1.5 rounded-full border border-primary/30 shadow-[0_0_15px_rgba(99,102,241,0.2)] z-50"
+              >
+                Woww! 🤩
+                {/* Pointer tail */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-transparent border-t-primary/30" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
+
+      {/* Soap Bubbles */}
+      <AnimatePresence>
+        {bubbles.map((bubble) => (
+          <motion.div
+            key={bubble.id}
+            className="fixed pointer-events-none z-[90] rounded-full"
+            style={{
+              left: bubble.x,
+              top: bubble.y,
+              width: bubble.size,
+              height: bubble.size,
+              background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1) 40%, rgba(100, 200, 255, 0.3) 60%, rgba(255, 100, 200, 0.3) 80%)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              boxShadow: 'inset -2px -2px 4px rgba(0, 0, 0, 0.1), 0 0 10px rgba(255, 255, 255, 0.3)',
+            }}
+            initial={{ scale: 0, opacity: 0, x: '-50%', y: '-50%' }}
+            animate={{ 
+              scale: [0, 1, 1, 1.5], 
+              opacity: [0, 0.8, 0.8, 0], 
+              y: ['-50%', 'calc(-50% - 40px)', 'calc(-50% - 80px)', 'calc(-50% - 120px)'],
+              x: ['-50%', 'calc(-50% + 20px)', 'calc(-50% - 20px)', 'calc(-50% + 15px)']
+            }}
+            transition={{ 
+              duration: 4, 
+              ease: "easeInOut",
+              times: [0, 0.2, 0.8, 1]
+            }}
+            exit={{ scale: 1.5, opacity: 0, transition: { duration: 0.2 } }}
+          />
+        ))}
+      </AnimatePresence>
+
       <ConfettiBurst active={confetti} x={pos.x} y={pos.y} onDone={() => setConfetti(false)} />
     </>,
     document.body

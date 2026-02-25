@@ -122,12 +122,12 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-16"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24"
     >
       {/* Subtle ambient light */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 w-full px-6 max-w-3xl mx-auto flex flex-col items-start">
+      <div className="relative z-10 w-full px-6 max-w-4xl mx-auto flex flex-col items-start">
 
         {/* Hire badge */}
         <style>{`
@@ -282,7 +282,7 @@ export function HeroSection() {
         <h1
           ref={headlineRef}
           style={{ willChange: 'filter, opacity, transform' }}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[0.95] mb-6"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
         >
           {/* Role — dominant */}
           <span className="block text-foreground">

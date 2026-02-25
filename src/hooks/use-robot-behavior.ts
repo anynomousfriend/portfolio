@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { Position, RobotExpression, WorkMode, WorkAction } from '@/types';
+import type { Position, RobotExpression, WorkMode, WorkAction, BubbleData } from '@/types';
 
 // ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
 // Do NOT call registerPlugin here.
@@ -11,6 +11,7 @@ export function useRobotBehavior() {
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<Position>({ x: 0, y: 0 });
   const [target, setTarget] = useState<Position>({ x: 0, y: 0 });
+  const posRef = useRef<Position>({ x: 0, y: 0 });
 
   // Initialize position on mount (client-only) to avoid hydration mismatch
   useEffect(() => {
@@ -18,6 +19,7 @@ export function useRobotBehavior() {
     const initialX = window.innerWidth - 100;
     const initialY = window.innerHeight - 100;
     setPos({ x: initialX, y: initialY });
+    posRef.current = { x: initialX, y: initialY };
     setTarget({ x: initialX, y: initialY });
   }, []);
 
@@ -31,6 +33,8 @@ export function useRobotBehavior() {
   const [clickCount, setClickCount] = useState(0);
   const [clickTimer, setClickTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [isNightOwl, setIsNightOwl] = useState(false);
+  const [bubbles, setBubbles] = useState<BubbleData[]>([]);
+  const [certificateWow, setCertificateWow] = useState(false);
 
   // Refs for behaviors that need no re-renders
   const shyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,8 +43,45 @@ export function useRobotBehavior() {
   const prevPathnameRef = useRef<string>('');
   const techBadgeCooldownRef = useRef<boolean>(false);
   const techBadgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const spawnBubblesSequenceRef = useRef<() => void>(() => {});
+  const certTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pathname = usePathname();
+
+  // ─── Certificate Viewer ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const handleCertEnter = (e: Event) => {
+      if (workMode !== 'none') return;
+      
+      const { x, y } = (e as CustomEvent).detail;
+      setTarget({ x, y });
+      setIsMoving(true);
+      setIsCatching(false);
+      setExpression('run');
+      
+      if (certTimerRef.current) clearTimeout(certTimerRef.current);
+      
+      certTimerRef.current = setTimeout(() => {
+        setExpression('happy');
+        setFacingRight(true); // looking right at the certificate popout
+        setCertificateWow(true);
+      }, 800); // delay until roughly arrived
+    };
+
+    const handleCertLeave = () => {
+      if (certTimerRef.current) clearTimeout(certTimerRef.current);
+      setCertificateWow(false);
+      setExpression('idle');
+    };
+
+    window.addEventListener('robot:certificate-enter', handleCertEnter);
+    window.addEventListener('robot:certificate-leave', handleCertLeave);
+    
+    return () => {
+      window.removeEventListener('robot:certificate-enter', handleCertEnter);
+      window.removeEventListener('robot:certificate-leave', handleCertLeave);
+    };
+  }, [workMode]);
 
   // ─── Night Owl: check local time on mount ───────────────────────────────────
   useEffect(() => {
@@ -493,6 +534,36 @@ export function useRobotBehavior() {
     }
   }, [mousePos, pos, isMoving, isCatching, workMode, expression]);
 
+  // ─── Bubble Logic ──────────────────────────────────────────────────────────
+  const spawnBubblesSequence = useCallback(() => {
+    let count = 0;
+    const max = 2 + Math.floor(Math.random() * 2); // 2 or 3 bubbles
+    
+    const interval = setInterval(() => {
+      const id = Math.random();
+      const size = 12 + Math.random() * 8; // 12-20px
+      
+      setBubbles(prev => [...prev, {
+        id,
+        x: posRef.current.x + (Math.random() * 20 - 10),
+        y: posRef.current.y - 30,
+        size
+      }]);
+      
+      // Auto-remove after 4 seconds
+      setTimeout(() => {
+        setBubbles(prev => prev.filter(b => b.id !== id));
+      }, 4000);
+      
+      count++;
+      if (count >= max) clearInterval(interval);
+    }, 800);
+  }, []);
+
+  useEffect(() => {
+    spawnBubblesSequenceRef.current = spawnBubblesSequence;
+  }, [spawnBubblesSequence]);
+
   // Idle behaviors
   useEffect(() => {
     let idleTimer: ReturnType<typeof setTimeout>;
@@ -523,6 +594,11 @@ export function useRobotBehavior() {
         } else if (rand < 0.92) {
           setExpression('starry');
           setTimeout(() => setExpression((prev) => (prev === 'starry' ? 'idle' : prev)), 4000);
+        } else if (rand < 0.98) {
+          // Trigger bubble sequence
+          setExpression('bubble');
+          spawnBubblesSequence();
+          setTimeout(() => setExpression((prev) => (prev === 'bubble' ? 'idle' : prev)), 6000);
         } else {
           setExpression('yawn');
           setTimeout(() => setExpression((prev) => (prev === 'yawn' ? 'idle' : prev)), 3000);
@@ -530,7 +606,7 @@ export function useRobotBehavior() {
       }, 3500 + Math.random() * 3000);
     }
     return () => clearTimeout(idleTimer);
-  }, [isMoving, expression, isCatching, workMode, isNightOwl]);
+  }, [isMoving, expression, isCatching, workMode, isNightOwl, spawnBubblesSequence]);
 
   // Animation loop for movement
   useEffect(() => {
@@ -561,10 +637,12 @@ export function useRobotBehavior() {
         if (dx < -5) setFacingRight(false);
 
         const speed = 0.04;
-        return {
+        const nextPos = {
           x: prev.x + dx * speed,
           y: prev.y + dy * speed,
         };
+        posRef.current = nextPos;
+        return nextPos;
       });
 
       if (isMoving) {
@@ -581,6 +659,8 @@ export function useRobotBehavior() {
 
   return {
     pos,
+    bubbles,
+    certificateWow,
     isMoving,
     isCatching,
     facingRight,

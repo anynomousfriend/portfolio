@@ -24,7 +24,15 @@ export type RobotExpression =
   | 'shy'
   | 'night'
   | 'sneeze'
-  | 'highfive';
+  | 'highfive'
+  | 'bubble';
+
+export type BubbleData = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+};
 
 export type WorkMode = 'none' | 'commuting' | 'arrived' | 'working';
 export type WorkAction = 'none' | 'waving' | 'typing' | 'pointing' | 'highfive';
@@ -34,7 +42,7 @@ export type SkillData = {
   desc: string;
   icon: ReactNode;
   size: string;
-  renderVisual: (inView: boolean) => ReactNode;
+  renderVisual: (inView: boolean, mousePos: { x: number; y: number }) => ReactNode;
 };
 
 export type ProjectData = {
@@ -58,7 +66,17 @@ export type ExperienceData = {
   company: string;
   role: string;
   period: string;
+  location?: string;
+  logo?: string;
   description: string;
   technologies: string[];
   liveUrl?: string;
+};
+
+export type CertificateData = {
+  title: string;
+  issuer: string;
+  date: string;
+  image: string;
+  url?: string;
 };

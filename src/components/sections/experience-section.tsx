@@ -1,15 +1,66 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { whenSmootherReady } from '@/lib/smoother-ready';
 import { Briefcase, ExternalLink } from 'lucide-react';
 import { experience } from '@/data/experience';
 import { TechBadge } from '@/components/ui/tech-badge';
-import { Badge } from '@/components/ui/badge';
 import { UxLawTooltip } from '@/components/ui/ux-law-tooltip';
 import { AppTooltip } from '@/components/ui/app-tooltip';
+
+// Rotating glow border on the icon box — activates when the parent row is hovered.
+// containerRef should point to the parent row element (the group div).
+function GlowIcon({ children, containerRef }: { children: React.ReactNode; containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const angleRef = useRef(Math.random() * 360);
+  const rafRef = useRef<number | null>(null);
+  const isHovering = useRef(false);
+
+  const drift = useCallback(() => {
+    if (isHovering.current && innerRef.current) {
+      angleRef.current = (angleRef.current + 0.4) % 360;
+      const a = angleRef.current * (Math.PI / 180);
+      const x = Math.cos(a) * 2;
+      const y = Math.sin(a) * 2;
+      innerRef.current.style.boxShadow = `
+        0 0 0 1px rgba(99,102,241,0.9),
+        ${x}px ${y}px 8px 1px rgba(99,102,241,0.6),
+        ${-x}px ${-y}px 4px 1px rgba(129,140,248,0.3)
+      `;
+    }
+    rafRef.current = requestAnimationFrame(drift);
+  }, []);
+
+  useEffect(() => {
+    rafRef.current = requestAnimationFrame(drift);
+    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+  }, [drift]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const onEnter = () => { isHovering.current = true; };
+    const onLeave = () => {
+      isHovering.current = false;
+      if (innerRef.current) innerRef.current.style.boxShadow = 'none';
+    };
+    container.addEventListener('mouseenter', onEnter);
+    container.addEventListener('mouseleave', onLeave);
+    return () => {
+      container.removeEventListener('mouseenter', onEnter);
+      container.removeEventListener('mouseleave', onLeave);
+    };
+  }, [containerRef]);
+
+  return (
+    <div className="shrink-0">
+      <div ref={innerRef} className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary/50 rounded-md flex items-center justify-center overflow-hidden">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 // ScrollTrigger is registered globally in SmoothScrollProvider
 
@@ -27,6 +78,9 @@ const appMap: Record<string, 'risk' | 'legal' | 'medical' | 'productivity'> = {
   'Lawyer\u2019s SaaS': 'legal',
   'Medical Apps': 'medical',
   'Productivity Apps': 'productivity',
+  'BuidlGuidl': 'productivity', // Fallback to productivity for now if specific not available
+  'PoolFunders': 'risk', // Fallback
+  'Foliobull': 'risk', // Fallback
 };
 
 // Renders **bold** as bright indigo highlights and *italic* as UxLawTooltip or zinc-200
@@ -65,6 +119,69 @@ function renderDescription(text: string) {
   });
 }
 
+// Each experience row — has its own ref passed to GlowIcon
+function ExperienceRow({ job, index, total }: { job: typeof experience[0]; index: number; total: number }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={rowRef} className="group relative flex gap-4 sm:gap-6">
+      {/* Logo Column */}
+      <GlowIcon containerRef={rowRef}>
+        {job.logo ? (
+          <img src={job.logo} alt={job.company} className="w-full h-full object-cover" />
+        ) : (
+          <Briefcase size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />
+        )}
+      </GlowIcon>
+
+      {/* Content Column */}
+      <div className={`flex-1 pb-10 ${index !== total - 1 ? 'border-b border-border' : ''}`}>
+        <div className="flex flex-col mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
+              {job.role}
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-base text-foreground/90 font-medium mt-1">
+            <span>{job.company}</span>
+            {job.liveUrl && (
+              <a
+                href={job.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors flex items-center"
+                aria-label={`View live project for ${job.company}`}
+              >
+                <ExternalLink size={14} />
+              </a>
+            )}
+          </div>
+
+          <div className="text-xs sm:text-sm text-muted-foreground mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="font-medium">{job.period}</span>
+            {job.location && (
+              <>
+                <span className="hidden sm:inline text-border">•</span>
+                <span>{job.location}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed mb-6 max-w-2xl group-hover:text-foreground/90 transition-colors">
+          {renderDescription(job.description)}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {job.technologies.map((tech, i) => (
+            <TechBadge key={i} tech={tech} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ExperienceSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -98,9 +215,9 @@ export function ExperienceSection() {
 
         gsap.fromTo(
           Array.from(items.children) as HTMLElement[],
-          { opacity: 0, x: -30, filter: 'blur(6px)' },
+          { opacity: 0, y: 30, filter: 'blur(6px)' },
           {
-            opacity: 1, x: 0, filter: 'blur(0px)',
+            opacity: 1, y: 0, filter: 'blur(0px)',
             duration: 0.8, ease: 'power3.out',
             stagger: { each: 0.15, from: 'start' },
             scrollTrigger: {
@@ -126,80 +243,18 @@ export function ExperienceSection() {
 
   return (
     <section ref={sectionRef} id="experience" className="py-24 px-6 max-w-4xl mx-auto bg-background relative z-10">
-      <div ref={headerRef} className="mb-12">
-        <h2 className="text-3xl font-extrabold text-foreground mb-4 tracking-tight">Work History</h2>
-        <div className="w-16 h-1 bg-primary mb-6" />
-        <p className="text-muted-foreground max-w-lg leading-relaxed text-sm">
-          A timeline of my professional journey, <span className="text-foreground font-medium">building products</span> and <span className="text-foreground font-medium">leading teams</span> across various industries.
+      <div ref={headerRef} className="mb-16 text-center sm:text-left">
+        <h2 className="text-3xl font-extrabold text-foreground mb-4 tracking-tight">Work Experience</h2>
+        <div className="w-16 h-1 bg-primary mb-6 mx-auto sm:mx-0" />
+        <p className="text-muted-foreground max-w-lg leading-relaxed text-sm mx-auto sm:mx-0">
+          A look at my professional journey, <span className="text-foreground font-medium">building products</span> and <span className="text-foreground font-medium">solving complex problems</span> at the intersection of design and technology.
         </p>
       </div>
 
-      {/* Timeline: line + items share the same coordinate space */}
-      <div className="relative">
-        {/* Vertical Base Line — sits at x=20px */}
-        <div className="absolute left-5 top-2 bottom-0 w-px bg-border" />
-
-        <div className="space-y-12" ref={itemsRef}>
-          {experience.map((job, index) => (
-            <div key={index} className="group relative flex gap-8 transition-all duration-500">
-
-              {/* Left column: diamond + highlight line, fixed width 40px */}
-              <div className="relative shrink-0 w-10">
-                {/* Diamond centered at x=20px (left: 50% - 5.5px ≈ left-[14.5px]) */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-2.5 w-[11px] h-[11px] bg-background border-2 border-muted-foreground rotate-45 group-hover:bg-primary/20 group-hover:border-primary transition-all duration-300 z-10 shadow-[0_0_0_4px_var(--background)]" />
-
-                {/* Connecting Highlight Line — centered under diamond */}
-                {index !== experience.length - 1 && (
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 top-[22px] bottom-[-48px] w-px bg-primary origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-700 ease-in-out"
-                    style={{ boxShadow: '0 0 6px 2px rgba(99,102,241,0.7), 0 0 16px 4px rgba(99,102,241,0.35)' }}
-                  />
-                )}
-              </div>
-
-              {/* Right column: content */}
-              <div className="flex-1 pb-2">
-
-              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1.5 gap-2">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                    {job.company}
-                  </h3>
-                  {job.liveUrl && (
-                    <a
-                      href={job.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors flex items-center"
-                      aria-label={`View live project for ${job.company}`}
-                    >
-                      <ExternalLink size={16} />
-                    </a>
-                  )}
-                </div>
-                <Badge variant="secondary" className="font-mono text-[10px] mt-1 sm:mt-0 w-fit shrink-0">
-                  {job.period}
-                </Badge>
-              </div>
-
-              <div className="text-base text-foreground font-medium mb-3 flex items-center gap-2">
-                <Briefcase size={14} className="text-primary" />
-                {job.role}
-              </div>
-
-              <div className="text-muted-foreground text-sm leading-relaxed mb-4 max-w-xl group-hover:text-foreground transition-colors">
-                {renderDescription(job.description)}
-              </div>
-
-              <div className="flex flex-wrap gap-2.5">
-                {job.technologies.map((tech, i) => (
-                  <TechBadge key={i} tech={tech} />
-                ))}
-              </div>
-              </div>{/* end right column */}
-            </div>
-          ))}
-        </div>
+      <div className="space-y-10" ref={itemsRef}>
+        {experience.map((job, index) => (
+          <ExperienceRow key={index} job={job} index={index} total={experience.length} />
+        ))}
       </div>
     </section>
   );

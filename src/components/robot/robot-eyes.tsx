@@ -224,19 +224,16 @@ export function RobotEyes({ expression }: RobotEyesProps) {
         </g>
       );
 
-    case 'highfive':
+    case 'bubble':
       return (
-        <g className="animate-bob-fast">
-          {/* Wide excited eyes */}
-          <circle cx="40" cy="49" r="7" fill="#818cf8" />
-          <circle cx="60" cy="49" r="7" fill="#818cf8" />
-          <circle cx="43" cy="46" r="2.5" fill="white" />
-          <circle cx="63" cy="46" r="2.5" fill="white" />
-          {/* Big grin */}
-          <path d="M38 60 Q50 67 62 60" stroke="#f472b6" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          {/* Cheek blushes */}
-          <ellipse cx="33" cy="57" rx="4" ry="2.5" fill="#f472b6" opacity="0.5" />
-          <ellipse cx="67" cy="57" rx="4" ry="2.5" fill="#f472b6" opacity="0.5" />
+        <g className="animate-bob-slow">
+          {/* Eyes looking upward following the bubble */}
+          <circle cx="40" cy="42" r="5" fill="#818cf8" />
+          <circle cx="60" cy="42" r="5" fill="#818cf8" />
+          <circle cx="42" cy="39" r="2" fill="white" />
+          <circle cx="62" cy="39" r="2" fill="white" />
+          {/* Small surprised mouth */}
+          <circle cx="50" cy="58" r="3" fill="none" stroke="#818cf8" strokeWidth="2" />
         </g>
       );
 
