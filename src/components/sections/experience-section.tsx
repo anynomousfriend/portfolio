@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { UxLawTooltip } from '@/components/ui/ux-law-tooltip';
 import { AppTooltip } from '@/components/ui/app-tooltip';
 
-gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger is registered globally in SmoothScrollProvider
 
 // Maps italic *UX Law* names to their tooltip law key
 const uxLawMap: Record<string, 'millers' | 'fitts' | 'peak-end' | 'zeigarnik'> = {
@@ -69,48 +69,44 @@ export function ExperienceSection() {
   const itemsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    gsap.set(headerRef.current, { opacity: 0 });
-    gsap.set(itemsRef.current?.children ?? [], { opacity: 0 });
+    const header = headerRef.current;
+    const items = itemsRef.current;
+    if (!header || !items) return;
 
-    const headerAnim = gsap.fromTo(
-      headerRef.current,
-      { opacity: 0, y: 40, filter: 'blur(8px)' },
-      {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: headerRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        header,
+        { opacity: 0, y: 40, filter: 'blur(8px)' },
+        {
+          opacity: 1, y: 0, filter: 'blur(0px)',
+          duration: 0.9, ease: 'power3.out',
+          scrollTrigger: {
+            trigger: header,
+            scroller: '#smooth-wrapper',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
 
-    const itemsAnim = gsap.fromTo(
-      itemsRef.current?.children ?? [],
-      { opacity: 0, x: -30, filter: 'blur(6px)' },
-      {
-        opacity: 1,
-        x: 0,
-        filter: 'blur(0px)',
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: { each: 0.15, from: 'start' },
-        scrollTrigger: {
-          trigger: itemsRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    );
+      gsap.fromTo(
+        Array.from(items.children) as HTMLElement[],
+        { opacity: 0, x: -30, filter: 'blur(6px)' },
+        {
+          opacity: 1, x: 0, filter: 'blur(0px)',
+          duration: 0.8, ease: 'power3.out',
+          stagger: { each: 0.15, from: 'start' },
+          scrollTrigger: {
+            trigger: items,
+            scroller: '#smooth-wrapper',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+    });
 
-    return () => {
-      headerAnim.scrollTrigger?.kill();
-      itemsAnim.scrollTrigger?.kill();
-    };
+    return () => ctx.revert();
   }, []);
 
   return (

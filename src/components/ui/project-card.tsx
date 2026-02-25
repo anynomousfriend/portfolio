@@ -44,15 +44,15 @@ function CtaPills({ project }: { project: ProjectData }) {
 export function ProjectCard({ project }: ProjectCardProps) {
   const cardBody = (
     <Card className="group relative overflow-hidden hover:border-border/80 transition-all duration-500 flex flex-col h-full gap-0">
-      {/* Featured badge */}
+      {/* Visual area — rendered first so the badge paints on top via DOM order */}
+      <div className="relative h-44 overflow-hidden shrink-0 -m-6 mb-0">{project.visual}</div>
+      {/* Featured badge — after visual in DOM so it stacks above it */}
       {project.featured && (
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 backdrop-blur-sm">
+        <div className="absolute top-3 right-3 z-30 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 backdrop-blur-sm">
           <Star size={9} className="fill-indigo-400 text-indigo-400" />
           Featured
         </div>
       )}
-      {/* Visual area */}
-      <div className="relative h-44 overflow-hidden shrink-0 -m-6 mb-0">{project.visual}</div>
 
       {/* Content */}
       <CardHeader className="space-y-2 pb-3 pt-4">

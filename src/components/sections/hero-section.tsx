@@ -8,8 +8,6 @@ import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
-
 // Inline tech pill — icon + label, used inside the value-prop sentence
 function InlineTech({ name }: { name: string }) {
   return (
@@ -31,46 +29,62 @@ export function HeroSection() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const fadeElements = [badgeRef.current, headlineRef.current, valuePropRef.current, ctasRef.current];
+    // Filter nulls — if any ref failed to attach, abort cleanly
+    const fadeElements = [
+      badgeRef.current,
+      headlineRef.current,
+      valuePropRef.current,
+      ctasRef.current,
+    ].filter((el): el is NonNullable<typeof el> => el !== null);
 
-    // ── Entrance animation ──────────────────────────────────────────────────
-    gsap.set(fadeElements, { opacity: 0, y: 20, filter: 'blur(40px)' });
+    if (fadeElements.length < 4) return;
 
-    const entranceTl = gsap.timeline({ delay: 0.3 });
-    entranceTl.to(fadeElements, {
-      opacity: 1,
-      y: 0,
-      filter: 'blur(0px)',
-      duration: 1.2,
-      ease: 'expo.out',
-      stagger: 0.14,
-    });
+    // gsap.context() captures every tween/trigger created inside.
+    // ctx.revert() on unmount kills them all and restores inline styles.
+    const ctx = gsap.context(() => {
+      // ── Entrance animation ────────────────────────────────────────────────
+      // Set will-change only for the duration of the entrance animation,
+      // then remove it so it doesn't break preserve-3d on the folder SVG
+      fadeElements.forEach(el => { el.style.willChange = 'filter, opacity, transform'; });
 
-    // ── Scroll blur-out ─────────────────────────────────────────────────────
-    const scrollFadeAnim = gsap.fromTo(
-      fadeElements,
-      { opacity: 1, y: 0, filter: 'blur(0px)' },
-      {
+      gsap.set(fadeElements, { opacity: 0, y: 20, filter: 'blur(40px)' });
+
+      gsap.timeline({ delay: 0.3 })
+        .to(fadeElements, {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 1.2,
+          ease: 'expo.out',
+          stagger: 0.14,
+        })
+        .call(() => {
+          // Remove will-change after entrance — restores preserve-3d for folder
+          fadeElements.forEach(el => { el.style.willChange = 'auto'; });
+        });
+
+      // ── Scroll blur-out ───────────────────────────────────────────────────
+      // Use gsap.to (not fromTo) so the from-state is always the live value,
+      // preventing a snap if the user scrolls before entrance finishes.
+      // scroller must point at #smooth-wrapper — window scroll is always 0.
+      // toggleActions is omitted — scrub reverses automatically by scroll position.
+      gsap.to(fadeElements, {
         opacity: 0.15,
         y: -10,
         filter: 'blur(10px)',
-        duration: 0.5,
-        ease: 'power1.inOut',
+        ease: 'none',
         stagger: 0.08,
         scrollTrigger: {
           trigger: section,
+          scroller: '#smooth-wrapper',
           start: 'bottom 90%',
           end: 'bottom 5%',
-          scrub: 3.5,
-          toggleActions: 'play none none reverse',
+          scrub: true,
         },
-      }
-    );
+      });
+    }, sectionRef);
 
-    return () => {
-      entranceTl.kill();
-      scrollFadeAnim.scrollTrigger?.kill();
-    };
+    return () => ctx.revert();
   }, []);
 
   return (

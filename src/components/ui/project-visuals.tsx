@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useId } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import type { Variants, Transition } from 'framer-motion';
 
@@ -266,6 +266,10 @@ export function PayPerRequestVisual() {
 export function TemporalVaultVisual() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
+  // useId gives a stable unique id per instance — prevents SVG gradient id
+  // collisions when multiple TemporalVaultVisuals exist in the same document
+  const uid = useId().replace(/:/g, '');
+  const gradId = `tvgrad-${uid}`;
 
   return (
     <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
@@ -326,12 +330,12 @@ export function TemporalVaultVisual() {
           <div className="text-[6px] text-zinc-500 font-mono">discount curve — √(time remaining)</div>
           <svg className="w-full flex-1" viewBox="0 0 100 28" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="tvgrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
                 <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
               </linearGradient>
             </defs>
-            <path d="M0 28 Q 20 26, 40 18 T 75 6 T 100 1 L100 28 Z" fill="url(#tvgrad)" />
+            <path d="M0 28 Q 20 26, 40 18 T 75 6 T 100 1 L100 28 Z" fill={`url(#${gradId})`} />
             <motion.path
               d="M0 28 Q 20 26, 40 18 T 75 6 T 100 1"
               fill="none"
@@ -779,7 +783,6 @@ export function IExecVisual() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
           className="flex-1 border border-dashed border-zinc-700 rounded-sm p-2 flex flex-col gap-1.5 relative"
-          style={{ borderColor: undefined }}
         >
           {/* animated dashed border glow */}
           <motion.div

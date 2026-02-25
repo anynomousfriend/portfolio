@@ -10,7 +10,7 @@ type SkillCardProps = {
 };
 
 export function SkillCard({ skill }: SkillCardProps) {
-  const [ref, inView] = useIntersectionObserver({ threshold: 0.2 });
+  const [ref, inView] = useIntersectionObserver<HTMLDivElement>(0.2);
   const glowRef = useRef<HTMLDivElement>(null);
   const angleRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
@@ -76,7 +76,7 @@ export function SkillCard({ skill }: SkillCardProps) {
         }}
       />
       <Card
-        ref={ref as React.RefObject<HTMLDivElement>}
+        ref={ref}
         className="group hover:border-border/80 transition-all duration-300 overflow-hidden flex flex-col justify-between min-h-[200px] w-full h-full"
       >
         <CardHeader className="pb-2">

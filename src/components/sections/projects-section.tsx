@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '@/data/projects';
@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import type { ProjectCategory } from '@/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger is registered globally in SmoothScrollProvider
 
 export function ProjectsSection() {
   const [activeTab, setActiveTab] = useState<ProjectCategory>('dev');
@@ -26,8 +26,12 @@ export function ProjectsSection() {
   const featuredGridRef = useRef<HTMLDivElement>(null);
   const moreGridRef = useRef<HTMLDivElement>(null);
 
-  // Entrance animation on scroll / tab change
+  // Entrance animation — merges tab reset so both happen in a single effect,
+  // eliminating the race between three separate effects on activeTab
   useEffect(() => {
+    // Reset showAll synchronously before any GSAP work
+    setShowAll(false);
+
     const header = headerRef.current;
     const grid = featuredGridRef.current;
     if (!header || !grid) return;
@@ -41,38 +45,42 @@ export function ProjectsSection() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: header,
+          scroller: '#smooth-wrapper',
           start: 'top 85%',
           toggleActions: 'play none none reverse',
         },
       });
 
       tl.to(header, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.8,
-        ease: 'power3.out',
+        opacity: 1, y: 0, filter: 'blur(0px)',
+        duration: 0.8, ease: 'power3.out',
       }).to(cards, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        scale: 1,
-        duration: 0.6,
-        ease: 'power3.out',
+        opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
+        duration: 0.6, ease: 'power3.out',
         stagger: { each: 0.1, from: 'start' },
       }, '-=0.4');
     });
 
-    return () => ctx.revert();
+    // Defer ScrollTrigger refresh so the new DOM has painted before measuring
+    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      ctx.revert();
+    };
   }, [activeTab]);
 
-  // Animate "more" cards in when expanded
-  useEffect(() => {
+  // Animate "more" cards in when expanded.
+  // useLayoutEffect guarantees moreGridRef.current is populated (DOM committed)
+  // before the animation reads it — fixes the null-ref race with useEffect.
+  useLayoutEffect(() => {
+    if (!showAll) return;
     const grid = moreGridRef.current;
-    if (!grid || !showAll) return;
+    if (!grid) return;
 
     const cards = Array.from(grid.children) as HTMLElement[];
-    gsap.fromTo(cards,
+    const tween = gsap.fromTo(
+      cards,
       { opacity: 0, y: 40, filter: 'blur(6px)', scale: 0.97 },
       {
         opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
@@ -80,12 +88,8 @@ export function ProjectsSection() {
         stagger: { each: 0.08, from: 'start' },
       }
     );
-  }, [showAll, activeTab]);
-
-  // Reset show-all when switching tabs
-  useEffect(() => {
-    setShowAll(false);
-  }, [activeTab]);
+    return () => { tween.kill(); };
+  }, [showAll]);
 
   return (
     <section id="projects" className="py-24 px-6">

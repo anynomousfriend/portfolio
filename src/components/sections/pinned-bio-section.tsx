@@ -3,9 +3,8 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
-gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+// ScrollTrigger registered globally in SmoothScrollProvider
 
 // Words to render in Playfair Display italic (like the hero "Hi")
 const PLAYFAIR_WORDS = new Set(['obsessed', 'boundary', 'design', 'craft', 'generative']);
@@ -26,20 +25,23 @@ export function PinnedBioSection() {
 
     // Wait for ScrollSmoother to be ready
     const ctx = gsap.context(() => {
-      const smoother = ScrollSmoother.get();
-
       gsap.set(wordEls, { opacity: 0, filter: 'blur(8px)', color: '#71717a' });
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          // Use ScrollSmoother's wrapper as the scroller — prevents conflict
-          scroller: smoother ? '#smooth-wrapper' : window,
+          // Must point at ScrollSmoother's wrapper — window scroll is always 0
+          scroller: '#smooth-wrapper',
           start: 'top top',
           end: '+=300%',
           pin: true,
           pinSpacing: true,
-          scrub: 1,
+          // pinnedContainer tells ScrollTrigger to offset pin coords for
+          // the translateY transform ScrollSmoother applies to #smooth-content
+          pinnedContainer: '#smooth-content',
+          // scrub: true = perfectly 1:1 with the (already-smoothed) scroll value.
+          // No additional spring lag on top of ScrollSmoother's smooth:1.5
+          scrub: true,
         },
       });
 
@@ -48,6 +50,8 @@ export function PinnedBioSection() {
         filter: 'blur(0px)',
         color: '#f4f4f5',
         stagger: 0.05,
+        // ease: 'none' is mandatory with scrub — any easing curve fights the
+        // direct scroll-position mapping and causes jitter when paused mid-scroll
         ease: 'none',
         duration: 1,
       });

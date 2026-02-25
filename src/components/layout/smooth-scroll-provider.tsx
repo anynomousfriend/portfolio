@@ -5,13 +5,13 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
+// Single global registration — all other components must NOT call registerPlugin
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const smootherRef = useRef<ScrollSmoother | null>(null);
 
   useEffect(() => {
-    // ScrollSmoother requires a browser environment — this only runs client-side
     smootherRef.current = ScrollSmoother.create({
       wrapper: '#smooth-wrapper',
       content: '#smooth-content',
@@ -19,6 +19,10 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       effects: true,
       smoothTouch: 0.1,
     });
+
+    // Force ScrollTrigger to recalculate all positions after smoother
+    // takes ownership of the scroll container
+    ScrollTrigger.refresh();
 
     return () => {
       smootherRef.current?.kill();

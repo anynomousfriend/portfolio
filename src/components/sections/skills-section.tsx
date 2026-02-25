@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { skills } from '@/data/skills';
 import { SkillCard } from '@/components/ui/skill-card';
 
-gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger is registered globally in SmoothScrollProvider
 
 export function SkillsSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -14,47 +14,39 @@ export function SkillsSection() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const section = sectionRef.current!;
-    const header = headerRef.current!;
-    const cards = Array.from(cardsRef.current!.children) as HTMLElement[];
+    const section = sectionRef.current;
+    const header = headerRef.current;
+    const cardsContainer = cardsRef.current;
+    if (!section || !header || !cardsContainer) return;
+
+    const cards = Array.from(cardsContainer.children) as HTMLElement[];
 
     const ctx = gsap.context(() => {
       gsap.set(header, { opacity: 0, y: 30, filter: 'blur(8px)' });
       gsap.set(cards, { opacity: 0, y: 60, filter: 'blur(6px)', scale: 0.96 });
 
-      // Build the animation timeline (time-based, not scrub-based)
       const tl = gsap.timeline({ paused: true });
 
-      // Header fades in first
       tl.to(header, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.7,
-        ease: 'power3.out',
+        opacity: 1, y: 0, filter: 'blur(0px)',
+        duration: 0.7, ease: 'power3.out',
       });
 
-      // Cards stagger in one by one
       tl.to(cards, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        scale: 1,
-        duration: 0.55,
-        ease: 'power3.out',
+        opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
+        duration: 0.55, ease: 'power3.out',
         stagger: { each: 0.12, from: 'start' },
       }, '-=0.2');
 
-      // Brief hold after all cards are in before releasing pin
       tl.to({}, { duration: 0.8 });
 
-      // Calculate total animation duration to use as the pin scroll distance
-      // We multiply by a px-per-second factor so ScrollSmoother feels natural
-      const animDuration = tl.totalDuration(); // seconds
-      const scrollDistance = animDuration * 180; // ~180px per second feels natural
+      const animDuration = tl.totalDuration();
+      const scrollDistance = animDuration * 180;
 
       ScrollTrigger.create({
         trigger: section,
+        scroller: '#smooth-wrapper',
+        pinnedContainer: '#smooth-content',
         start: 'top top',
         end: `+=${scrollDistance}`,
         pin: true,
@@ -66,7 +58,6 @@ export function SkillsSection() {
           gsap.set(cards, { opacity: 0, y: 60, filter: 'blur(6px)', scale: 0.96 });
         },
       });
-
     }, section);
 
     return () => ctx.revert();
