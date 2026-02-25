@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRobotBehavior } from '@/hooks/use-robot-behavior';
 import { RobotSVG } from './robot-svg';
 import { ConfettiBurst } from './confetti-burst';
@@ -31,7 +32,11 @@ export function RobotCompanion() {
   // Don't render until mounted to avoid hydration mismatch
   if (!mounted) return null;
 
-  return (
+  // Portal to document.body so the robot escapes #smooth-content's CSS transform.
+  // ScrollSmoother applies translateY to #smooth-content — any position:fixed child
+  // of a transformed ancestor is no longer fixed to the viewport, only to that
+  // container. Portalling to body puts it back in the normal stacking context.
+  return createPortal(
     <>
       <div
         className="fixed z-[100] w-16 h-16 flex items-center justify-center transition-transform pointer-events-none"
@@ -81,6 +86,7 @@ export function RobotCompanion() {
         </div>
       </div>
       <ConfettiBurst active={confetti} x={pos.x} y={pos.y} onDone={() => setConfetti(false)} />
-    </>
+    </>,
+    document.body
   );
 }
