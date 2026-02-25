@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 import { projects } from '@/data/projects';
 import { ProjectCard } from '@/components/ui/project-card';
 import { Button } from '@/components/ui/button';
@@ -70,16 +70,11 @@ export function ProjectsSection() {
       requestAnimationFrame(() => ScrollTrigger.refresh());
     };
 
-    const deferredSetup = () => setTimeout(setupAnimations, 0);
-
-    if (ScrollSmoother.get()) {
-      setTimeout(setupAnimations, 0);
-    } else {
-      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
-    }
+    let cancelled = false;
+    whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', deferredSetup);
+      cancelled = true;
       scrollCtx?.revert();
       ctx.revert();
     };

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 import { Briefcase, ExternalLink } from 'lucide-react';
 import { experience } from '@/data/experience';
 import { TechBadge } from '@/components/ui/tech-badge';
@@ -114,16 +114,11 @@ export function ExperienceSection() {
       }, sectionRef);
     };
 
-    const deferredSetup = () => setTimeout(setupAnimations, 0);
-
-    if (ScrollSmoother.get()) {
-      setTimeout(setupAnimations, 0);
-    } else {
-      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
-    }
+    let cancelled = false;
+    whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', deferredSetup);
+      cancelled = true;
       scrollCtx?.revert();
       ctx.revert();
     };

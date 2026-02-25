@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { signalSmootherReady, resetSmootherReady } from '@/lib/smoother-ready';
 
 // Single global registration — all other components must NOT call registerPlugin
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
@@ -31,14 +32,13 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     // takes ownership of the scroll container.
     ScrollTrigger.refresh();
 
-    // Dispatch synchronously — ScrollSmoother.create() has returned and its
-    // scroller proxy is registered. Each component that listens wraps its own
-    // setup in setTimeout(0) so it runs in a fresh macrotask, fully outside
-    // this useEffect call stack. This is the only reliable way to guarantee
-    // the proxy is usable before any gsap.to(..., { scrollTrigger }) call.
-    window.dispatchEvent(new CustomEvent('smoothscroller:ready'));
+    // Signal all consumers via the smoother-ready module. Each callback is
+    // scheduled as a fresh macrotask (setTimeout 0) by signalSmootherReady,
+    // guaranteeing it runs fully outside this useEffect call stack.
+    signalSmootherReady();
 
     return () => {
+      resetSmootherReady();
       ScrollTrigger.killAll();
       smootherRef.current?.kill();
       smootherRef.current = null;

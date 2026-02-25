@@ -7,6 +7,7 @@ import { TechIcon } from '@/components/ui/tech-icon';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 
 // ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
 // Do NOT call registerPlugin here — re-registering ScrollTrigger alone after
@@ -108,16 +109,11 @@ export function HeroSection() {
       }, sectionRef);
     };
 
-    const deferredSetup = () => setTimeout(setupScrollBlurOut, 0);
-
-    if (ScrollSmoother.get()) {
-      setTimeout(setupScrollBlurOut, 0);
-    } else {
-      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
-    }
+    let cancelled = false;
+    whenSmootherReady(() => { if (!cancelled) setupScrollBlurOut(); });
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', deferredSetup);
+      cancelled = true;
       ctx.revert();
       scrollCtx?.revert();
     };

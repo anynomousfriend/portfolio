@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 
 // ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
 // Do NOT call registerPlugin here.
@@ -36,18 +37,11 @@ export function Navbar() {
 
     // Defer until ScrollSmoother is ready — ScrollTrigger.create() must not be
     // called before SmoothScrollProvider's useEffect runs ScrollSmoother.create().
-    // Additionally, wrap every call in setTimeout(fn, 0) so it always runs in a
-    // fresh macrotask, after ScrollSmoother's scroller proxy is fully usable.
-    const deferredSetup = () => setTimeout(setupScrollTrigger, 0);
-
-    if (ScrollSmoother.get()) {
-      setTimeout(setupScrollTrigger, 0);
-    } else {
-      window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
-    }
+    let cancelled = false;
+    whenSmootherReady(() => { if (!cancelled) setupScrollTrigger(); });
 
     return () => {
-      window.removeEventListener('smoothscroller:ready', deferredSetup);
+      cancelled = true;
       st?.kill();
     };
   }, []);
