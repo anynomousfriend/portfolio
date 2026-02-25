@@ -37,8 +37,14 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     // still mid-execution; the scroller proxy isn't registered yet, so any
     // gsap.to(..., { scrollTrigger: { scroller: '#smooth-wrapper' } }) crashes
     // with "Cannot read properties of undefined (reading '_gsap')".
+    // Double-rAF: the first frame lets ScrollSmoother.create() fully return
+    // and register its scroll proxy. The second frame guarantees the proxy's
+    // internal async setup (ResizeObserver callbacks, pin-spacer injection)
+    // has also completed before child animations try to use the scroller.
     requestAnimationFrame(() => {
-      window.dispatchEvent(new CustomEvent('smoothscroller:ready'));
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new CustomEvent('smoothscroller:ready'));
+      });
     });
 
     return () => {
