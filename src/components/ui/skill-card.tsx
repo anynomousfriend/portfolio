@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { SkillData } from '@/types';
@@ -11,12 +11,15 @@ type SkillCardProps = {
 
 export function SkillCard({ skill }: SkillCardProps) {
   const [ref, inView] = useIntersectionObserver<HTMLDivElement>(0.2);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const angleRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
   const isHovering = useRef(false);
+  const pendingRaf = useRef<number | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Idle drift: slowly increment angle
+  // Idle drift: slowly increment angle — runs entirely outside React render
   const drift = useCallback(() => {
     if (!isHovering.current && glowRef.current) {
       angleRef.current = (angleRef.current + 0.3) % 360;
@@ -26,11 +29,11 @@ export function SkillCard({ skill }: SkillCardProps) {
   }, []);
 
   useEffect(() => {
-    // Randomize starting angle on client only to avoid SSR hydration mismatch
     angleRef.current = Math.random() * 360;
     rafRef.current = requestAnimationFrame(drift);
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (pendingRaf.current !== null) cancelAnimationFrame(pendingRaf.current);
     };
   }, [drift]);
 
@@ -40,21 +43,39 @@ export function SkillCard({ skill }: SkillCardProps) {
     const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
+
+    // Glow border — direct DOM write, zero re-render
     const angle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI) + 90 - 180;
     angleRef.current = angle;
     if (glowRef.current) {
       glowRef.current.style.setProperty('--glow-angle', `${angle}deg`);
     }
+
+    // Throttle setState to one update per animation frame — eliminates jitter
+    // caused by React batching/flushing on every mousemove event (60-120/sec).
+    const mx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const my = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    if (pendingRaf.current !== null) return; // already queued this frame
+    pendingRaf.current = requestAnimationFrame(() => {
+      pendingRaf.current = null;
+      setMousePos({ x: mx, y: my });
+    });
   };
 
   const handleMouseLeave = () => {
     isHovering.current = false;
+    if (pendingRaf.current !== null) {
+      cancelAnimationFrame(pendingRaf.current);
+      pendingRaf.current = null;
+    }
+    setMousePos({ x: 0, y: 0 });
   };
 
   return (
     <div
+      ref={wrapperRef}
       className={`${skill.size} relative`}
-      style={{ padding: '1px', borderRadius: '12px' }}
+      style={{ padding: '1px', borderRadius: '12px', ['--mx' as string]: '0', ['--my' as string]: '0' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -88,7 +109,7 @@ export function SkillCard({ skill }: SkillCardProps) {
         </CardHeader>
 
         <CardContent className="flex-1 flex items-center justify-center w-full relative min-h-[140px]">
-          {skill.renderVisual(inView)}
+          {skill.renderVisual(inView, mousePos)}
         </CardContent>
       </Card>
     </div>
