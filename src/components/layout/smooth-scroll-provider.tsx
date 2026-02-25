@@ -31,21 +31,12 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     // takes ownership of the scroll container.
     ScrollTrigger.refresh();
 
-    // Signal child components via rAF — fires AFTER the current call stack
-    // (including ScrollSmoother.create()) fully unwinds. Dispatching
-    // synchronously causes setupAnimations callbacks to run while create() is
-    // still mid-execution; the scroller proxy isn't registered yet, so any
-    // gsap.to(..., { scrollTrigger: { scroller: '#smooth-wrapper' } }) crashes
-    // with "Cannot read properties of undefined (reading '_gsap')".
-    // Double-rAF: the first frame lets ScrollSmoother.create() fully return
-    // and register its scroll proxy. The second frame guarantees the proxy's
-    // internal async setup (ResizeObserver callbacks, pin-spacer injection)
-    // has also completed before child animations try to use the scroller.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.dispatchEvent(new CustomEvent('smoothscroller:ready'));
-      });
-    });
+    // Dispatch synchronously — ScrollSmoother.create() has returned and its
+    // scroller proxy is registered. Each component that listens wraps its own
+    // setup in setTimeout(0) so it runs in a fresh macrotask, fully outside
+    // this useEffect call stack. This is the only reliable way to guarantee
+    // the proxy is usable before any gsap.to(..., { scrollTrigger }) call.
+    window.dispatchEvent(new CustomEvent('smoothscroller:ready'));
 
     return () => {
       ScrollTrigger.killAll();
