@@ -85,22 +85,21 @@ export function PinnedBioSection() {
       <div className="max-w-4xl mx-auto w-full">
         <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-[1.3] tracking-tight">
           {words.map((word, i) => (
-            <span
-              key={i}
-              ref={(el) => { wordsRef.current[i] = el; }}
-              className="inline-block mr-[0.28em]"
-              style={{
-                opacity: 0,
-                filter: 'blur(8px)',
-                color: '#71717a',
-                willChange: 'opacity, filter, color',
-                ...(PLAYFAIR_WORDS.has(word) && {
-                  fontFamily: 'var(--font-playfair)',
-                  fontStyle: 'italic',
-                }),
-              }}
-            >
-              {word}
+            <span key={i} className="inline whitespace-nowrap">
+              <span
+                ref={(el) => { wordsRef.current[i] = el; }}
+                className="inline"
+                style={{
+                  willChange: 'opacity, filter, color',
+                  ...(PLAYFAIR_WORDS.has(word) && {
+                    fontFamily: 'var(--font-playfair)',
+                    fontStyle: 'italic',
+                  }),
+                }}
+              >
+                {word}
+              </span>
+              {i < words.length - 1 ? ' ' : ''}
             </span>
           ))}
         </p>
