@@ -79,16 +79,18 @@ export function HeroSection() {
     // The { once: true } option ensures the listener is auto-removed after
     // firing, and the ScrollSmoother.get() check handles HMR / fast-refresh
     // cases where the smoother was already created before this effect ran.
+    // scrollCtx is created fresh inside setupScrollBlurOut — AFTER the smoother
+    // is ready — so it never captures a stale scroller proxy reference.
+    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+
     const setupScrollBlurOut = () => {
-      // Guard: if ctx was already reverted (component unmounted before the
-      // event fired) we must not create new tweens.
+      // Guard: component may have unmounted before the timeout fired.
       if (!sectionRef.current) return;
 
-      ctx.add(() => {
-        // Use gsap.to (not fromTo) so the from-state is always the live value,
-        // preventing a snap if the user scrolls before entrance finishes.
-        // scroller must point at #smooth-wrapper — window scroll is always 0.
-        // toggleActions is omitted — scrub reverses automatically by scroll position.
+      // Create a brand-new context here, not ctx.add() — ctx.add() executes
+      // synchronously inside a context that was created before the smoother
+      // existed, giving it a stale scroller proxy and causing _gsap undefined.
+      scrollCtx = gsap.context(() => {
         gsap.to(fadeElements, {
           opacity: 0.15,
           y: -10,
@@ -103,13 +105,12 @@ export function HeroSection() {
             scrub: true,
           },
         });
-      });
+      }, sectionRef);
     };
 
     const deferredSetup = () => setTimeout(setupScrollBlurOut, 0);
 
     if (ScrollSmoother.get()) {
-      // Smoother already exists (e.g. HMR / Strict Mode second mount)
       setTimeout(setupScrollBlurOut, 0);
     } else {
       window.addEventListener('smoothscroller:ready', deferredSetup, { once: true });
@@ -118,6 +119,7 @@ export function HeroSection() {
     return () => {
       window.removeEventListener('smoothscroller:ready', deferredSetup);
       ctx.revert();
+      scrollCtx?.revert();
     };
   }, []);
 

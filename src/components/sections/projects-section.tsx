@@ -23,6 +23,7 @@ export function ProjectsSection() {
   const restProjects = hasFeatured ? allProjects.filter((p) => !p.featured) : [];
   const hasMore = restProjects.length > 0;
 
+  const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const featuredGridRef = useRef<HTMLDivElement>(null);
   const moreGridRef = useRef<HTMLDivElement>(null);
@@ -44,10 +45,11 @@ export function ProjectsSection() {
     gsap.set(cards, { opacity: 0, y: 50, filter: 'blur(6px)', scale: 0.97 });
 
     const ctx = gsap.context(() => {});
+    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
 
     const setupAnimations = () => {
       if (!headerRef.current) return;
-      ctx.add(() => {
+      scrollCtx = gsap.context(() => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: header,
@@ -64,7 +66,7 @@ export function ProjectsSection() {
           duration: 0.6, ease: 'power3.out',
           stagger: { each: 0.1, from: 'start' },
         }, '-=0.4');
-      });
+      }, sectionRef);
       requestAnimationFrame(() => ScrollTrigger.refresh());
     };
 
@@ -78,6 +80,7 @@ export function ProjectsSection() {
 
     return () => {
       window.removeEventListener('smoothscroller:ready', deferredSetup);
+      scrollCtx?.revert();
       ctx.revert();
     };
   }, [activeTab]);
@@ -104,7 +107,7 @@ export function ProjectsSection() {
   }, [showAll]);
 
   return (
-    <section id="projects" className="py-24 px-6">
+    <section ref={sectionRef} id="projects" className="py-24 px-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8 mb-12">

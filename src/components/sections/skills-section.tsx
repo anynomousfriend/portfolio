@@ -23,10 +23,11 @@ export function SkillsSection() {
     const cards = Array.from(cardsContainer.children) as HTMLElement[];
 
     const ctx = gsap.context(() => {});
+    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
 
     const setupAnimations = () => {
       if (!sectionRef.current) return;
-      ctx.add(() => {
+      scrollCtx = gsap.context(() => {
         gsap.set(header, { opacity: 0, y: 30, filter: 'blur(8px)' });
         gsap.set(cards, { opacity: 0, y: 60, filter: 'blur(6px)', scale: 0.96 });
 
@@ -62,7 +63,7 @@ export function SkillsSection() {
             gsap.set(cards, { opacity: 0, y: 60, filter: 'blur(6px)', scale: 0.96 });
           },
         });
-      });
+      }, sectionRef);
     };
 
     const deferredSetup = () => setTimeout(setupAnimations, 0);
@@ -75,6 +76,7 @@ export function SkillsSection() {
 
     return () => {
       window.removeEventListener('smoothscroller:ready', deferredSetup);
+      scrollCtx?.revert();
       ctx.revert();
     };
   }, []);

@@ -28,10 +28,11 @@ export function PinnedBioSection() {
     gsap.set(wordEls, { opacity: 0, filter: 'blur(8px)', color: '#71717a' });
 
     const ctx = gsap.context(() => {});
+    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
 
     const setupAnimations = () => {
       if (!sectionRef.current) return;
-      ctx.add(() => {
+      scrollCtx = gsap.context(() => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
@@ -60,7 +61,7 @@ export function PinnedBioSection() {
           ease: 'none',
           duration: 1,
         });
-      });
+      }, sectionRef);
     };
 
     // ScrollSmoother must exist before we create any scrollTrigger with its scroller.
@@ -75,6 +76,7 @@ export function PinnedBioSection() {
 
     return () => {
       window.removeEventListener('smoothscroller:ready', deferredSetup);
+      scrollCtx?.revert();
       ctx.revert();
     };
   }, []);

@@ -66,6 +66,7 @@ function renderDescription(text: string) {
 }
 
 export function ExperienceSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
 
@@ -75,10 +76,11 @@ export function ExperienceSection() {
     if (!header || !items) return;
 
     const ctx = gsap.context(() => {});
+    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
 
     const setupAnimations = () => {
       if (!headerRef.current) return;
-      ctx.add(() => {
+      scrollCtx = gsap.context(() => {
         gsap.fromTo(
           header,
           { opacity: 0, y: 40, filter: 'blur(8px)' },
@@ -109,7 +111,7 @@ export function ExperienceSection() {
             },
           }
         );
-      });
+      }, sectionRef);
     };
 
     const deferredSetup = () => setTimeout(setupAnimations, 0);
@@ -122,12 +124,13 @@ export function ExperienceSection() {
 
     return () => {
       window.removeEventListener('smoothscroller:ready', deferredSetup);
+      scrollCtx?.revert();
       ctx.revert();
     };
   }, []);
 
   return (
-    <section id="experience" className="py-24 px-6 max-w-4xl mx-auto bg-background relative z-10">
+    <section ref={sectionRef} id="experience" className="py-24 px-6 max-w-4xl mx-auto bg-background relative z-10">
       <div ref={headerRef} className="mb-12">
         <h2 className="text-3xl font-extrabold text-foreground mb-4 tracking-tight">Work History</h2>
         <div className="w-16 h-1 bg-primary mb-6" />
