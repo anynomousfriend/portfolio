@@ -15,58 +15,53 @@ const PARAGRAPH =
 
 const words = PARAGRAPH.split(' ');
 
+// Pre-compute total character count (including spaces between words) for ref array sizing
+const totalChars = words.reduce((sum, word, i) => {
+  return sum + word.length + (i < words.length - 1 ? 1 : 0);
+}, 0);
+
 export function PinnedBioSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const wordsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const charsRef = useRef<(HTMLSpanElement | null)[]>(new Array(totalChars).fill(null));
 
   useEffect(() => {
     const section = sectionRef.current;
-    const wordEls = wordsRef.current.filter(Boolean) as HTMLSpanElement[];
-    if (!section || wordEls.length === 0) return;
+    const charEls = charsRef.current.filter(Boolean) as HTMLSpanElement[];
+    if (!section || charEls.length === 0) return;
 
-    const ctx = gsap.context(() => {});
+    const ctx = gsap.context(() => { });
     let scrollCtx: ReturnType<typeof gsap.context> | null = null;
 
     const setupAnimations = () => {
       if (!sectionRef.current) return;
-      // Set initial hidden state here — inside setupAnimations — so words
+      // Set initial hidden state here — inside setupAnimations — so chars
       // only become invisible when the ScrollTrigger is actually being created.
-      // Setting them invisible before (outside this callback) caused a blank
-      // section when the smoother-ready callback was invalidated by Strict Mode.
-      gsap.set(wordEls, { opacity: 0, filter: 'blur(8px)', color: '#71717a' });
+      gsap.set(charEls, { opacity: 0, filter: 'blur(8px)', color: '#71717a' });
       scrollCtx = gsap.context(() => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
-            // Must point at ScrollSmoother's wrapper — window scroll is always 0
             scroller: '#smooth-wrapper',
             start: 'top top',
             end: '+=300%',
             pin: true,
             pinSpacing: true,
-            // pinnedContainer tells ScrollTrigger to offset pin coords for
-            // the translateY transform ScrollSmoother applies to #smooth-content
             pinnedContainer: '#smooth-content',
-            // scrub: true = perfectly 1:1 with the (already-smoothed) scroll value.
-            // No additional spring lag on top of ScrollSmoother's smooth:1.5
             scrub: true,
           },
         });
 
-        tl.to(wordEls, {
+        tl.to(charEls, {
           opacity: 1,
           filter: 'blur(0px)',
           color: '#f4f4f5',
-          stagger: 0.05,
-          // ease: 'none' is mandatory with scrub — any easing curve fights the
-          // direct scroll-position mapping and causes jitter when paused mid-scroll
+          stagger: 0.008,
           ease: 'none',
           duration: 1,
         });
       }, sectionRef);
     };
 
-    // ScrollSmoother must exist before we create any scrollTrigger with its scroller.
     let cancelled = false;
     whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
 
@@ -77,34 +72,65 @@ export function PinnedBioSection() {
     };
   }, []);
 
+  // Track a running index across all characters for the ref array
+  let charIndex = 0;
+
   return (
     <section
       ref={sectionRef}
       className="relative min-h-screen flex items-center px-6"
     >
       <div className="max-w-4xl mx-auto w-full">
-        <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-[1.3] tracking-tight">
-          {words.map((word, i) => (
-            <span key={i} className="inline whitespace-nowrap">
-              <span
-                ref={(el) => { wordsRef.current[i] = el; }}
-                className="inline"
-                style={{
-                  willChange: 'opacity, filter, color',
-                  ...(PLAYFAIR_WORDS.has(word) && {
-                    fontFamily: 'var(--font-playfair)',
-                    fontStyle: 'italic',
-                  }),
-                }}
-              >
-                {word}
+        <p className="text-xl sm:text-2xl md:text-3xl font-extrabold leading-[1.4] tracking-tight">
+          {words.map((word, wordIdx) => {
+            const isPlayfair = PLAYFAIR_WORDS.has(word);
+
+            // Render each character of the word as its own span
+            const charSpans = word.split('').map((char) => {
+              const idx = charIndex++;
+              return (
+                <span
+                  key={idx}
+                  ref={(el) => { charsRef.current[idx] = el; }}
+                  className="inline"
+                  style={{
+                    willChange: 'opacity, filter, color',
+                    ...(isPlayfair && {
+                      fontFamily: 'var(--font-playfair)',
+                      fontStyle: 'italic',
+                    }),
+                  }}
+                >
+                  {char}
+                </span>
+              );
+            });
+
+            // Add an animated space character between words
+            let spaceSpan = null;
+            if (wordIdx < words.length - 1) {
+              const spaceIdx = charIndex++;
+              spaceSpan = (
+                <span
+                  key={`sp-${spaceIdx}`}
+                  ref={(el) => { charsRef.current[spaceIdx] = el; }}
+                  className="inline"
+                  style={{ willChange: 'opacity, filter, color' }}
+                >
+                  {' '}
+                </span>
+              );
+            }
+
+            return (
+              <span key={`w-${wordIdx}`} className="inline">
+                <span className="inline whitespace-nowrap">{charSpans}</span>
+                {spaceSpan}
               </span>
-              {i < words.length - 1 ? ' ' : ''}
-            </span>
-          ))}
+            );
+          })}
         </p>
       </div>
     </section>
   );
 }
-
