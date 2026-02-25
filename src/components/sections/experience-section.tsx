@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { Briefcase, ExternalLink } from 'lucide-react';
 import { experience } from '@/data/experience';
 import { TechBadge } from '@/components/ui/tech-badge';
@@ -73,40 +74,54 @@ export function ExperienceSection() {
     const items = itemsRef.current;
     if (!header || !items) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        header,
-        { opacity: 0, y: 40, filter: 'blur(8px)' },
-        {
-          opacity: 1, y: 0, filter: 'blur(0px)',
-          duration: 0.9, ease: 'power3.out',
-          scrollTrigger: {
-            trigger: header,
-            scroller: '#smooth-wrapper',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
+    const ctx = gsap.context(() => {});
 
-      gsap.fromTo(
-        Array.from(items.children) as HTMLElement[],
-        { opacity: 0, x: -30, filter: 'blur(6px)' },
-        {
-          opacity: 1, x: 0, filter: 'blur(0px)',
-          duration: 0.8, ease: 'power3.out',
-          stagger: { each: 0.15, from: 'start' },
-          scrollTrigger: {
-            trigger: items,
-            scroller: '#smooth-wrapper',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    });
+    const setupAnimations = () => {
+      if (!headerRef.current) return;
+      ctx.add(() => {
+        gsap.fromTo(
+          header,
+          { opacity: 0, y: 40, filter: 'blur(8px)' },
+          {
+            opacity: 1, y: 0, filter: 'blur(0px)',
+            duration: 0.9, ease: 'power3.out',
+            scrollTrigger: {
+              trigger: header,
+              scroller: '#smooth-wrapper',
+              start: 'top 85%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
 
-    return () => ctx.revert();
+        gsap.fromTo(
+          Array.from(items.children) as HTMLElement[],
+          { opacity: 0, x: -30, filter: 'blur(6px)' },
+          {
+            opacity: 1, x: 0, filter: 'blur(0px)',
+            duration: 0.8, ease: 'power3.out',
+            stagger: { each: 0.15, from: 'start' },
+            scrollTrigger: {
+              trigger: items,
+              scroller: '#smooth-wrapper',
+              start: 'top 85%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      });
+    };
+
+    if (ScrollSmoother.get()) {
+      setupAnimations();
+    } else {
+      window.addEventListener('smoothscroller:ready', setupAnimations, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('smoothscroller:ready', setupAnimations);
+      ctx.revert();
+    };
   }, []);
 
   return (

@@ -3,6 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { projects } from '@/data/projects';
 import { ProjectCard } from '@/components/ui/project-card';
 import { Button } from '@/components/ui/button';
@@ -38,34 +39,43 @@ export function ProjectsSection() {
 
     const cards = Array.from(grid.children) as HTMLElement[];
 
-    const ctx = gsap.context(() => {
-      gsap.set(header, { opacity: 0, y: 40, filter: 'blur(8px)' });
-      gsap.set(cards, { opacity: 0, y: 50, filter: 'blur(6px)', scale: 0.97 });
+    // Set initial hidden state immediately — no scroller dependency
+    gsap.set(header, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    gsap.set(cards, { opacity: 0, y: 50, filter: 'blur(6px)', scale: 0.97 });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: header,
-          scroller: '#smooth-wrapper',
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
-        },
+    const ctx = gsap.context(() => {});
+
+    const setupAnimations = () => {
+      if (!headerRef.current) return;
+      ctx.add(() => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: header,
+            scroller: '#smooth-wrapper',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+        tl.to(header, {
+          opacity: 1, y: 0, filter: 'blur(0px)',
+          duration: 0.8, ease: 'power3.out',
+        }).to(cards, {
+          opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
+          duration: 0.6, ease: 'power3.out',
+          stagger: { each: 0.1, from: 'start' },
+        }, '-=0.4');
       });
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    };
 
-      tl.to(header, {
-        opacity: 1, y: 0, filter: 'blur(0px)',
-        duration: 0.8, ease: 'power3.out',
-      }).to(cards, {
-        opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
-        duration: 0.6, ease: 'power3.out',
-        stagger: { each: 0.1, from: 'start' },
-      }, '-=0.4');
-    });
-
-    // Defer ScrollTrigger refresh so the new DOM has painted before measuring
-    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+    if (ScrollSmoother.get()) {
+      setupAnimations();
+    } else {
+      window.addEventListener('smoothscroller:ready', setupAnimations, { once: true });
+    }
 
     return () => {
-      cancelAnimationFrame(rafId);
+      window.removeEventListener('smoothscroller:ready', setupAnimations);
       ctx.revert();
     };
   }, [activeTab]);

@@ -52,8 +52,8 @@ export default function RootLayout({
       >
         <SmoothScrollProvider>
           {children}
+          <RobotCompanion />
         </SmoothScrollProvider>
-        <RobotCompanion />
       </body>
     </html>
   );
