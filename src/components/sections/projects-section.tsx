@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { whenSmootherReady } from '@/lib/smoother-ready';
 import { projects } from '@/data/projects';
 import { ProjectCard } from '@/components/ui/project-card';
 import { Button } from '@/components/ui/button';
@@ -28,10 +26,12 @@ export function ProjectsSection() {
   const featuredGridRef = useRef<HTMLDivElement>(null);
   const moreGridRef = useRef<HTMLDivElement>(null);
 
-  // Entrance animation — merges tab reset so both happen in a single effect,
-  // eliminating the race between three separate effects on activeTab
+  // Entrance animation — runs on mount and on every tab change.
+  // No ScrollTrigger needed here: the user is already looking at the
+  // projects section when they switch tabs, so a direct tween is correct.
+  // Using ScrollTrigger with toggleActions caused cards to stay invisible
+  // when the trigger point had already passed (user scrolled past it).
   useEffect(() => {
-    // Reset showAll synchronously before any GSAP work
     setShowAll(false);
 
     const header = headerRef.current;
@@ -40,42 +40,22 @@ export function ProjectsSection() {
 
     const cards = Array.from(grid.children) as HTMLElement[];
 
-    // Set initial hidden state immediately — no scroller dependency
     gsap.set(header, { opacity: 0, y: 40, filter: 'blur(8px)' });
     gsap.set(cards, { opacity: 0, y: 50, filter: 'blur(6px)', scale: 0.97 });
 
-    const ctx = gsap.context(() => {});
-    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
-
-    const setupAnimations = () => {
-      if (!headerRef.current) return;
-      scrollCtx = gsap.context(() => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: header,
-            scroller: '#smooth-wrapper',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        });
-        tl.to(header, {
-          opacity: 1, y: 0, filter: 'blur(0px)',
-          duration: 0.8, ease: 'power3.out',
-        }).to(cards, {
-          opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
-          duration: 0.6, ease: 'power3.out',
-          stagger: { each: 0.1, from: 'start' },
-        }, '-=0.4');
-      }, sectionRef);
-      requestAnimationFrame(() => ScrollTrigger.refresh());
-    };
-
-    let cancelled = false;
-    whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ delay: 0.05 });
+      tl.to(header, {
+        opacity: 1, y: 0, filter: 'blur(0px)',
+        duration: 0.7, ease: 'power3.out',
+      }).to(cards, {
+        opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
+        duration: 0.55, ease: 'power3.out',
+        stagger: { each: 0.09, from: 'start' },
+      }, '-=0.35');
+    }, sectionRef);
 
     return () => {
-      cancelled = true;
-      scrollCtx?.revert();
       ctx.revert();
     };
   }, [activeTab]);
