@@ -24,14 +24,16 @@ export function PinnedBioSection() {
     const wordEls = wordsRef.current.filter(Boolean) as HTMLSpanElement[];
     if (!section || wordEls.length === 0) return;
 
-    // Set initial state immediately (no scroller dependency)
-    gsap.set(wordEls, { opacity: 0, filter: 'blur(8px)', color: '#71717a' });
-
     const ctx = gsap.context(() => {});
     let scrollCtx: ReturnType<typeof gsap.context> | null = null;
 
     const setupAnimations = () => {
       if (!sectionRef.current) return;
+      // Set initial hidden state here — inside setupAnimations — so words
+      // only become invisible when the ScrollTrigger is actually being created.
+      // Setting them invisible before (outside this callback) caused a blank
+      // section when the smoother-ready callback was invalidated by Strict Mode.
+      gsap.set(wordEls, { opacity: 0, filter: 'blur(8px)', color: '#71717a' });
       scrollCtx = gsap.context(() => {
         const tl = gsap.timeline({
           scrollTrigger: {
