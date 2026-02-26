@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TechIcon } from '@/components/ui/tech-icon';
 import ColorBends from '@/components/ui/color-bends';
+import GradualBlur from '@/components/ui/gradual-blur';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -373,6 +374,20 @@ export function HeroSection() {
         </div>
 
       </div>
+
+      {/* Gradual blur transition — blends hero into the next section */}
+      <GradualBlur
+        target="parent"
+        position="bottom"
+        height="8rem"
+        strength={2}
+        divCount={6}
+        curve="bezier"
+        exponential
+        opacity={1}
+        zIndex={5}
+      />
+
     </section>
   );
 }
