@@ -14,7 +14,7 @@
  *   import { ProjectsSection } from '@/components/sections/projects-section-v2';
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ExternalLink, Github, BookOpen, Star } from 'lucide-react';
 import { projects } from '@/data/projects';
@@ -107,6 +107,9 @@ function DossierCard({ project }: { project: ProjectData }) {
 export function ProjectsSection() {
   const [activeTab, setActiveTab] = useState<ProjectCategory>('dev');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHoveredIndexRef = useRef<number | null>(null);
+  const cardHoveredRef = useRef(false);
 
   const allProjects = projects[activeTab];
 
@@ -116,6 +119,44 @@ export function ProjectsSection() {
   }));
 
   const hoveredProject = hoveredIndex !== null ? allProjects[hoveredIndex] : null;
+
+  const handleMenuHover = (index: number | null) => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    if (index !== null) {
+      lastHoveredIndexRef.current = index;
+      setHoveredIndex(index);
+    } else {
+      // Cursor left the menu row — give a short grace period so the user
+      // can move into the dossier card without it vanishing.
+      hideTimerRef.current = setTimeout(() => {
+        if (!cardHoveredRef.current) {
+          setHoveredIndex(null);
+          lastHoveredIndexRef.current = null;
+        }
+      }, 150);
+    }
+  };
+
+  const handleCardMouseEnter = () => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    cardHoveredRef.current = true;
+    // Re-assert the index so the card stays rendered
+    if (lastHoveredIndexRef.current !== null) {
+      setHoveredIndex(lastHoveredIndexRef.current);
+    }
+  };
+
+  const handleCardMouseLeave = () => {
+    cardHoveredRef.current = false;
+    setHoveredIndex(null);
+    lastHoveredIndexRef.current = null;
+  };
 
   return (
     <section id="projects" className="py-24 px-6">
@@ -137,7 +178,12 @@ export function ProjectsSection() {
             {(['design', 'dev'] as ProjectCategory[]).map((tab) => (
               <Button
                 key={tab}
-                onClick={() => { setActiveTab(tab); setHoveredIndex(null); }}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setHoveredIndex(null);
+                  cardHoveredRef.current = false;
+                  lastHoveredIndexRef.current = null;
+                }}
                 variant={activeTab === tab ? 'default' : 'ghost'}
                 size="sm"
                 className={cn('capitalize transition-all duration-300', activeTab === tab && 'shadow-md')}
@@ -155,7 +201,7 @@ export function ProjectsSection() {
             <FlowingMenu
               items={menuItems}
               speed={18}
-              onHover={setHoveredIndex}
+              onHover={handleMenuHover}
               activeIndex={hoveredIndex}
             />
           </div>
@@ -169,6 +215,8 @@ export function ProjectsSection() {
                   ? 'opacity-100 translate-x-0 shadow-2xl shadow-indigo-500/10 border-indigo-500/20'
                   : 'opacity-0 translate-x-4 pointer-events-none'
               )}
+              onMouseEnter={handleCardMouseEnter}
+              onMouseLeave={handleCardMouseLeave}
             >
               {hoveredProject && <DossierCard project={hoveredProject} />}
             </div>
