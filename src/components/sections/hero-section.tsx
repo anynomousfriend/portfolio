@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TechIcon } from '@/components/ui/tech-icon';
+import ColorBends from '@/components/ui/color-bends';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -124,6 +125,23 @@ export function HeroSection() {
       ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24"
     >
+      {/* ColorBends WebGL background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <ColorBends
+          colors={["#6366f1", "#818cf8", "#312e81"]}
+          rotation={0}
+          speed={0.2}
+          scale={1}
+          frequency={1}
+          warpStrength={1}
+          mouseInfluence={1}
+          parallax={0.5}
+          noise={0.1}
+          transparent
+          autoRotate={0}
+        />
+      </div>
+
       {/* Subtle ambient light */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
