@@ -24,7 +24,6 @@ export type RobotExpression =
   | 'shy'
   | 'night'
   | 'sneeze'
-  | 'highfive'
   | 'bubble';
 
 export type BubbleData = {
@@ -35,7 +34,7 @@ export type BubbleData = {
 };
 
 export type WorkMode = 'none' | 'commuting' | 'arrived' | 'working';
-export type WorkAction = 'none' | 'waving' | 'typing' | 'pointing' | 'highfive';
+export type WorkAction = 'none' | 'waving' | 'typing' | 'pointing';
 
 export type SkillData = {
   title: string;

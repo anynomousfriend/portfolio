@@ -484,10 +484,6 @@
   animation: sneeze-jolt 0.4s ease-out forwards;
 }
 
-.animate-highfive-arms {
-  animation: wave 0.3s ease-in-out infinite;
-}
-
 @keyframes sneeze-jolt {
   0% {
     transform: translateY(0) rotate(0deg);

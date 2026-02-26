@@ -38,8 +38,6 @@ export function useRobotBehavior() {
 
   // Refs for behaviors that need no re-renders
   const shyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const highFiveTimestampsRef = useRef<number[]>([]);
-  const highFiveWorkActionRef = useRef<WorkAction>('none');
   const prevPathnameRef = useRef<string>('');
   const techBadgeCooldownRef = useRef<boolean>(false);
   const techBadgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -242,7 +240,7 @@ export function useRobotBehavior() {
     }
   }, [mousePos, isMoving, isCatching, workMode, expression, mounted]);
 
-  // Handle click to move & hire badge interaction + high five detection
+  // Handle click to move & hire badge interaction
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       // Don't move robot while modal is open
@@ -273,33 +271,8 @@ export function useRobotBehavior() {
       }
 
       // Always reset workMode on any click so the robot can always be moved.
-      // This handles the case where ScrollSmoother prevents scroll events from
-      // firing and workMode gets stuck in 'commuting' / 'working'.
       setWorkMode('none');
       setWorkAction('none');
-
-      // ─── High Five detection ───────────────────────────────────────────────
-      const now = Date.now();
-      // Keep only timestamps within the last 600ms
-      highFiveTimestampsRef.current = highFiveTimestampsRef.current.filter(
-        (t) => now - t < 600
-      );
-      highFiveTimestampsRef.current.push(now);
-
-      if (highFiveTimestampsRef.current.length >= 3) {
-        // Trigger high five!
-        highFiveTimestampsRef.current = [];
-        const offsetX = 50;
-        const offsetY = 50;
-        const targetX = Math.min(Math.max(e.clientX + offsetX, 50), window.innerWidth - 50);
-        const targetY = Math.min(Math.max(e.clientY + offsetY, 50), window.innerHeight - 50);
-        setTarget({ x: targetX, y: targetY });
-        setIsMoving(true);
-        setIsCatching(false);
-        highFiveWorkActionRef.current = 'highfive';
-        setExpression('run');
-        return;
-      }
 
       // Normal click-to-move
       const offsetX = 50;
@@ -408,21 +381,6 @@ export function useRobotBehavior() {
     }
   }, [workMode]);
 
-  // ─── High Five arrival: trigger expression when robot stops moving ───────────
-  useEffect(() => {
-    if (!isMoving && highFiveWorkActionRef.current === 'highfive') {
-      highFiveWorkActionRef.current = 'none';
-      setExpression('highfive');
-      setWorkAction('highfive');
-      setTimeout(() => {
-        setExpression('happy');
-        setWorkAction('none');
-        setTimeout(() => {
-          setExpression((prev) => (prev === 'happy' ? 'idle' : prev));
-        }, 2000);
-      }, 2500);
-    }
-  }, [isMoving]);
 
   // ─── Celebrate: fired when contact form is successfully sent ─────────────────
   useEffect(() => {
@@ -621,7 +579,7 @@ export function useRobotBehavior() {
         if (dist < 5) {
           if (isMoving) {
             setIsMoving(false);
-            if (workMode === 'none' && highFiveWorkActionRef.current !== 'highfive') {
+            if (workMode === 'none') {
               setExpression('happy');
               setTimeout(() => {
                 setExpression((prevExp) =>
