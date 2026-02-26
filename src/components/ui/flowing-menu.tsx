@@ -54,7 +54,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const marqueeRef = useRef<HTMLDivElement>(null);
   const marqueeInnerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
-  const [repetitions, setRepetitions] = useState(4);
+  const [repetitions, setRepetitions] = useState(4); // always ≥ 1, clamped to 20
   // Track whether a touch interaction triggered the marquee so we can
   // dismiss it correctly when the row is tapped again (toggle).
   const touchActiveRef = useRef(false);
@@ -89,9 +89,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
       const marqueeContent = marqueeInnerRef.current.querySelector('.marquee-part') as HTMLElement;
       if (!marqueeContent) return;
       const contentWidth = marqueeContent.offsetWidth;
-      const viewportWidth = window.innerWidth;
+      if (!contentWidth || contentWidth <= 0) return; // guard against div-by-zero / Infinity
+      const viewportWidth = window.innerWidth || 375;
       const needed = Math.ceil(viewportWidth / contentWidth) + 2;
-      setRepetitions(Math.max(4, needed));
+      const safe = Math.min(Math.max(4, needed), 20); // clamp between 4 and 20
+      setRepetitions(safe);
     };
     calculateRepetitions();
     window.addEventListener('resize', calculateRepetitions);
@@ -190,7 +192,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
         style={{ backgroundColor: marqueeBgColor }}
       >
         <div className="h-full w-fit flex" ref={marqueeInnerRef}>
-          {[...Array(repetitions)].map((_, idx) => (
+          {[...Array(Math.min(Math.max(1, repetitions), 20))].map((_, idx) => (
             <div className="marquee-part flex items-center flex-shrink-0" key={idx} style={{ color: marqueeTextColor }}>
               <span className="whitespace-nowrap uppercase font-normal text-[3.5vh] leading-[1] px-[1vw]">{text}</span>
               {displayImage && (
