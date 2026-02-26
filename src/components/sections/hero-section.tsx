@@ -379,8 +379,8 @@ export function HeroSection() {
             Engineer<span className="text-indigo-400">.</span>
           </span>
           {/* Name — secondary, smaller, softer */}
-          <span className="block text-3xl sm:text-4xl md:text-5xl font-semibold text-zinc-500 mt-3 tracking-normal">
-            <span style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic' }}>I&apos;m</span>{' '}
+          <span className="block text-3xl sm:text-4xl md:text-5xl font-semibold text-zinc-400 mt-3 tracking-normal">
+            <span style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic' }}>Hi! I&apos;m</span>{' '}
             Subhankar<span className="text-indigo-500/60">.</span>
           </span>
         </h1>
