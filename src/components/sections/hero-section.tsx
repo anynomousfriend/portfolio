@@ -32,6 +32,8 @@ export function HeroSection() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const valuePropRef = useRef<HTMLParagraphElement>(null);
   const ctasRef = useRef<HTMLDivElement>(null);
+  const badgeInnerRef = useRef<HTMLDivElement>(null);
+  const touchActiveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -203,9 +205,31 @@ export function HeroSection() {
           className="hire-badge-wrapper mb-8"
           style={{ willChange: 'filter, opacity, transform' }}
         >
-          <div className="hire-badge-inner group inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-zinc-800 bg-zinc-900/60 cursor-pointer transition-colors duration-300">
+          <div
+            ref={badgeInnerRef}
+            className="hire-badge-inner group inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-zinc-800 bg-zinc-900/60 cursor-pointer transition-colors duration-300"
+            onTouchStart={() => {
+              const inner = badgeInnerRef.current;
+              const wrapper = badgeRef.current;
+              if (!inner || !wrapper) return;
+              const isActive = inner.classList.contains('touch-active');
+              if (isActive) {
+                inner.classList.remove('touch-active');
+                wrapper.classList.remove('touch-active');
+              } else {
+                inner.classList.add('touch-active');
+                wrapper.classList.add('touch-active');
+                // Auto-dismiss after 3s so it doesn't stay stuck
+                if (touchActiveTimerRef.current) clearTimeout(touchActiveTimerRef.current);
+                touchActiveTimerRef.current = setTimeout(() => {
+                  inner.classList.remove('touch-active');
+                  wrapper.classList.remove('touch-active');
+                }, 3000);
+              }
+            }}
+          >
 
-            {/* Flat folder — goes isometric only on hover */}
+            {/* Flat folder — goes isometric on hover (desktop) or touch-active (mobile) */}
             <style>{`
               .flat-folder {
                 position: relative;
@@ -215,7 +239,8 @@ export function HeroSection() {
                 transform: none;
                 transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
               }
-              .group:hover .flat-folder {
+              .group:hover .flat-folder,
+              .group.touch-active .flat-folder {
                 transform: rotateX(22deg) rotateY(-22deg) rotateZ(2deg);
               }
               .flat-folder-body {
@@ -226,7 +251,8 @@ export function HeroSection() {
                 border-radius: 4px;
                 transition: box-shadow 0.5s ease;
               }
-              .group:hover .flat-folder-body {
+              .group:hover .flat-folder-body,
+              .group.touch-active .flat-folder-body {
                 box-shadow: -3px 3px 0 #27272a;
               }
               .flat-folder-tab {
@@ -237,7 +263,8 @@ export function HeroSection() {
                 border-radius: 4px 4px 0 0;
                 transition: box-shadow 0.5s ease;
               }
-              .group:hover .flat-folder-tab {
+              .group:hover .flat-folder-tab,
+              .group.touch-active .flat-folder-tab {
                 box-shadow: -2px 2px 0 #3f3f46;
               }
               .flat-folder-lid {
@@ -249,9 +276,59 @@ export function HeroSection() {
                 transform-origin: bottom center;
                 transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.5s ease;
               }
-              .group:hover .flat-folder-lid {
+              .group:hover .flat-folder-lid,
+              .group.touch-active .flat-folder-lid {
                 transform: rotateX(-40deg) translateY(-1px);
                 box-shadow: -3px 2px 0 #3f3f46;
+              }
+              /* Folder images — shared active state for both hover and touch */
+              .folder-img {
+                position: absolute;
+                bottom: 6px; left: 4px;
+                width: 16px; height: 16px;
+                object-fit: cover;
+                border-radius: 3px;
+                opacity: 0;
+                transition: opacity 0.3s ease-out, transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+              }
+              .group:hover .folder-img,
+              .group.touch-active .folder-img {
+                opacity: 1;
+              }
+              .folder-img-1 {
+                z-index: 10;
+                transform: none;
+                transition-delay: 0s;
+              }
+              .group:hover .folder-img-1,
+              .group.touch-active .folder-img-1 {
+                transform: translateY(-28px) translateX(-16px) rotate(-12deg) scale(1.5);
+              }
+              .folder-img-2 {
+                z-index: 20;
+                transform: none;
+                transition-delay: 0.075s;
+              }
+              .group:hover .folder-img-2,
+              .group.touch-active .folder-img-2 {
+                transform: translateY(-36px) rotate(6deg) scale(1.5);
+              }
+              .folder-img-3 {
+                z-index: 30;
+                transform: none;
+                transition-delay: 0.15s;
+              }
+              .group:hover .folder-img-3,
+              .group.touch-active .folder-img-3 {
+                transform: translateY(-24px) translateX(16px) rotate(12deg) scale(1.5);
+              }
+              /* Badge glow on touch-active */
+              .hire-badge-wrapper.touch-active::before {
+                opacity: 1;
+                animation: badge-glow-spin 2s linear infinite;
+              }
+              .hire-badge-wrapper.touch-active .hire-badge-inner {
+                border-color: transparent;
               }
             `}</style>
             <div className="flat-folder">
@@ -262,28 +339,19 @@ export function HeroSection() {
               <img
                 src="https://cdn.dribbble.com/userupload/12268346/file/original-ddafd5a48aac1bb495012d9e72582e23.png?format=webp&resize=640x480&vertical=center"
                 alt="Project 1"
-                className="absolute bottom-1.5 left-1 w-4 h-4 object-cover rounded-[3px] z-10
-                           transition-all duration-300 ease-out opacity-0
-                           group-hover:opacity-100 group-hover:duration-500 group-hover:[transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]
-                           group-hover:-translate-y-7 group-hover:-translate-x-4 group-hover:-rotate-12 group-hover:scale-150"
+                className="folder-img folder-img-1"
               />
               {/* Image 2 — pops straight up */}
               <img
                 src="https://cdn.dribbble.com/userupload/12247225/file/original-b25192d62fb137f05a31171a65d5ed61.png?format=webp&resize=640x480&vertical=center"
                 alt="Project 2"
-                className="absolute bottom-1.5 left-1 w-4 h-4 object-cover rounded-[3px] z-20
-                           transition-all duration-300 ease-out opacity-0
-                           group-hover:opacity-100 group-hover:duration-500 group-hover:[transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]
-                           group-hover:delay-75 group-hover:-translate-y-9 group-hover:rotate-6 group-hover:scale-150"
+                className="folder-img folder-img-2"
               />
               {/* Image 3 — pops right */}
               <img
                 src="https://cdn.dribbble.com/userupload/42692647/file/original-27c1f8e463b61ba1b86bb784aa812a26.png?format=webp&resize=640x480&vertical=center"
                 alt="Project 3"
-                className="absolute bottom-1.5 left-1 w-4 h-4 object-cover rounded-[3px] z-30
-                           transition-all duration-300 ease-out opacity-0
-                           group-hover:opacity-100 group-hover:duration-500 group-hover:[transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]
-                           group-hover:delay-150 group-hover:-translate-y-6 group-hover:translate-x-4 group-hover:rotate-12 group-hover:scale-150"
+                className="folder-img folder-img-3"
               />
               <div className="flat-folder-lid" />
             </div>
