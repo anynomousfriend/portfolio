@@ -55,6 +55,9 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const marqueeInnerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
   const [repetitions, setRepetitions] = useState(4);
+  // Track whether a touch interaction triggered the marquee so we can
+  // dismiss it correctly when the row is tapped again (toggle).
+  const touchActiveRef = useRef(false);
   const displayImage = coverImage || image;
 
   const animationDefaults = { duration: 0.6, ease: 'expo' };
@@ -63,6 +66,21 @@ const MenuItem: React.FC<MenuItemProps> = ({
     const topEdgeDist = Math.pow(mouseX - width / 2, 2) + Math.pow(mouseY, 2);
     const bottomEdgeDist = Math.pow(mouseX - width / 2, 2) + Math.pow(mouseY - height, 2);
     return topEdgeDist < bottomEdgeDist ? 'top' : 'bottom';
+  };
+
+  const showMarquee = (edge: 'top' | 'bottom') => {
+    if (!marqueeRef.current || !marqueeInnerRef.current) return;
+    gsap.timeline({ defaults: animationDefaults })
+      .set(marqueeRef.current, { y: edge === 'top' ? '-101%' : '101%' }, 0)
+      .set(marqueeInnerRef.current, { y: edge === 'top' ? '101%' : '-101%' }, 0)
+      .to([marqueeRef.current, marqueeInnerRef.current], { y: '0%' }, 0);
+  };
+
+  const hideMarquee = (edge: 'top' | 'bottom') => {
+    if (!marqueeRef.current || !marqueeInnerRef.current) return;
+    gsap.timeline({ defaults: animationDefaults })
+      .to(marqueeRef.current, { y: edge === 'top' ? '-101%' : '101%' }, 0)
+      .to(marqueeInnerRef.current, { y: edge === 'top' ? '101%' : '-101%' }, 0);
   };
 
   useEffect(() => {
@@ -102,38 +120,66 @@ const MenuItem: React.FC<MenuItemProps> = ({
     };
   }, [text, displayImage, repetitions, speed]);
 
+  // Dismiss marquee highlight when this row is deactivated externally
+  // (e.g. another row was tapped on mobile).
+  useEffect(() => {
+    if (!isActive && touchActiveRef.current) {
+      touchActiveRef.current = false;
+      hideMarquee('bottom');
+    }
+  }, [isActive]);
+
   const handleMouseEnter = (ev: React.MouseEvent<HTMLDivElement>) => {
-    if (!itemRef.current || !marqueeRef.current || !marqueeInnerRef.current) return;
+    if (!itemRef.current) return;
     const rect = itemRef.current.getBoundingClientRect();
     const edge = findClosestEdge(ev.clientX - rect.left, ev.clientY - rect.top, rect.width, rect.height);
-    gsap.timeline({ defaults: animationDefaults })
-      .set(marqueeRef.current, { y: edge === 'top' ? '-101%' : '101%' }, 0)
-      .set(marqueeInnerRef.current, { y: edge === 'top' ? '101%' : '-101%' }, 0)
-      .to([marqueeRef.current, marqueeInnerRef.current], { y: '0%' }, 0);
+    showMarquee(edge);
     onHover?.(index);
   };
 
   const handleMouseLeave = (ev: React.MouseEvent<HTMLDivElement>) => {
-    if (!itemRef.current || !marqueeRef.current || !marqueeInnerRef.current) return;
+    if (!itemRef.current) return;
     const rect = itemRef.current.getBoundingClientRect();
     const edge = findClosestEdge(ev.clientX - rect.left, ev.clientY - rect.top, rect.width, rect.height);
-    gsap.timeline({ defaults: animationDefaults })
-      .to(marqueeRef.current, { y: edge === 'top' ? '-101%' : '101%' }, 0)
-      .to(marqueeInnerRef.current, { y: edge === 'top' ? '101%' : '-101%' }, 0);
+    hideMarquee(edge);
     onHover?.(null);
+  };
+
+  // Touch: tap to toggle. Plays the same marquee animation so it feels
+  // identical to the desktop hover — just triggered by finger instead.
+  const handleTouchStart = (ev: React.TouchEvent<HTMLDivElement>) => {
+    if (!itemRef.current) return;
+    const touch = ev.touches[0];
+    const rect = itemRef.current.getBoundingClientRect();
+
+    if (isActive && touchActiveRef.current) {
+      // Second tap on the same active row — collapse it
+      touchActiveRef.current = false;
+      hideMarquee('bottom');
+      onHover?.(null);
+      onClick?.(index); // still fire onClick so accordion can close
+    } else {
+      // New tap — expand this row
+      touchActiveRef.current = true;
+      const edge = findClosestEdge(touch.clientX - rect.left, touch.clientY - rect.top, rect.width, rect.height);
+      showMarquee(edge);
+      onHover?.(index);
+      onClick?.(index);
+    }
   };
 
   return (
     <div
-      className="flex-1 relative overflow-hidden text-center cursor-pointer"
+      className="flex-1 relative overflow-hidden text-center cursor-pointer select-none"
       ref={itemRef}
       style={{ borderTop: isFirst ? 'none' : `1px solid ${borderColor}` }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
       onClick={() => onClick?.(index)}
     >
       <div
-        className="flex items-center justify-center h-full relative uppercase font-semibold text-[3.5vh] transition-opacity duration-300"
+        className="flex items-center justify-center h-full relative uppercase font-semibold text-[3.5vh] transition-colors duration-300"
         style={{ color: isActive ? '#6366f1' : textColor }}
       >
         {text}
