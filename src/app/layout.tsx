@@ -20,9 +20,8 @@ const playfairDisplay = Playfair_Display({
   style: ["italic"],
 });
 
-const siteUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "https://subhankarchoudhury.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  || "https://subhankarchoudhury.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -52,7 +51,7 @@ export const metadata: Metadata = {
     description:
       "Blockchain/Web3 engineer and design-focused full-stack developer building at the intersection of DeFi, privacy tech, and beautiful UI/UX.",
     creator: "@SsubhankarX",
-    images: ["/OG-Preview.png"],
+    images: [`${siteUrl}/OG-Preview.png`],
   },
 };
 
