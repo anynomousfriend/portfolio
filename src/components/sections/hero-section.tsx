@@ -137,7 +137,7 @@ export function HeroSection() {
           scale={1}
           frequency={1}
           warpStrength={1}
-          mouseInfluence={1}
+          mouseInfluence={0.3}
           parallax={0.5}
           noise={0.1}
           transparent

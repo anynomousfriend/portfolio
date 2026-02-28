@@ -296,14 +296,18 @@ export default function ColorBends({
 
     const handlePointerMove = (e: PointerEvent) => {
       const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
-      const y = -(((e.clientY - rect.top) / (rect.height || 1)) * 2 - 1);
+      // Clamp pointer to container bounds for correct NDC mapping
+      const relX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const relY = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+      const x = (relX / (rect.width || 1)) * 2 - 1;
+      const y = -((relY / (rect.height || 1)) * 2 - 1);
       pointerTargetRef.current.set(x, y);
     };
 
-    container.addEventListener('pointermove', handlePointerMove);
+    // Listen on window so pointer-events-none on the container doesn't block events
+    window.addEventListener('pointermove', handlePointerMove);
     return () => {
-      container.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointermove', handlePointerMove);
     };
   }, []);
 
