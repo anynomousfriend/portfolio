@@ -1,29 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
-import { whenSmootherReady } from '@/lib/smoother-ready';
+import { GoArrowUpRight } from 'react-icons/go';
 import { ContactModal } from '@/components/ui/contact-modal';
 
-// ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
-// Do NOT call registerPlugin here.
-
-type NavItem = {
-  label: string;
-  href: string;
-  sectionId?: string;
-};
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Home',     href: '#',            sectionId: 'hero' },
-  { label: 'Projects', href: '#projects',    sectionId: 'projects' },
-  { label: 'Skills',   href: '#skills',      sectionId: 'skills' },
-  { label: 'Work',     href: '#experience',  sectionId: 'experience' },
-  { label: 'Contact',  href: '#contact' },
-];
-
-// Inline spiral SVG logo — matches icon.svg
+// ── Spiral SVG Logo (matches icon.svg) ──────────────────────────────
 function SpiralLogo({ size = 28 }: { size?: number }) {
   return (
     <svg
@@ -34,330 +17,315 @@ function SpiralLogo({ size = 28 }: { size?: number }) {
       height={size}
     >
       <defs>
-        <radialGradient id="nb-bg" cx="50%" cy="50%" r="50%">
+        <radialGradient id="cn-bg" cx="50%" cy="50%" r="50%">
           <stop offset="0%"  stopColor="#3730a3"/>
           <stop offset="40%" stopColor="#1e1b4b"/>
           <stop offset="100%" stopColor="#09090b"/>
         </radialGradient>
-        <radialGradient id="nb-core" cx="50%" cy="50%" r="50%">
+        <radialGradient id="cn-core" cx="50%" cy="50%" r="50%">
           <stop offset="0%"   stopColor="#e0e7ff" stopOpacity="1"/>
           <stop offset="40%"  stopColor="#818cf8" stopOpacity="0.9"/>
           <stop offset="100%" stopColor="#4f46e5" stopOpacity="0"/>
         </radialGradient>
-        <filter id="nb-glow" x="-40%" y="-40%" width="180%" height="180%">
+        <filter id="cn-glow" x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="1.2" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <filter id="nb-softglow" x="-60%" y="-60%" width="220%" height="220%">
+        <filter id="cn-softglow" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="2.5" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
-      <rect width="32" height="32" rx="8" fill="url(#nb-bg)"/>
+      <rect width="32" height="32" rx="8" fill="url(#cn-bg)"/>
       <path d="M 16 4 Q 28 4 28 16 Q 28 26 18 27"
         fill="none" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.5"/>
       <path d="M 16 28 Q 4 28 4 16 Q 4 6 14 5"
         fill="none" stroke="#818cf8" strokeWidth="1.8" strokeLinecap="round" opacity="0.5"/>
       <path d="M 16 7 Q 25 7 25 16 Q 25 23 18 24"
-        fill="none" stroke="#a5b4fc" strokeWidth="1.4" strokeLinecap="round" opacity="0.65" filter="url(#nb-glow)"/>
+        fill="none" stroke="#a5b4fc" strokeWidth="1.4" strokeLinecap="round" opacity="0.65" filter="url(#cn-glow)"/>
       <path d="M 16 25 Q 7 25 7 16 Q 7 9 14 8"
-        fill="none" stroke="#c4b5fd" strokeWidth="1.4" strokeLinecap="round" opacity="0.65" filter="url(#nb-glow)"/>
+        fill="none" stroke="#c4b5fd" strokeWidth="1.4" strokeLinecap="round" opacity="0.65" filter="url(#cn-glow)"/>
       <path d="M 16 10 Q 22 10 22 16 Q 22 21 17 21.5"
-        fill="none" stroke="#e0e7ff" strokeWidth="1.1" strokeLinecap="round" opacity="0.8" filter="url(#nb-glow)"/>
+        fill="none" stroke="#e0e7ff" strokeWidth="1.1" strokeLinecap="round" opacity="0.8" filter="url(#cn-glow)"/>
       <path d="M 16 22 Q 10 22 10 16 Q 10 11 15 10.5"
-        fill="none" stroke="#f0f9ff" strokeWidth="1.1" strokeLinecap="round" opacity="0.8" filter="url(#nb-glow)"/>
-      <circle cx="16" cy="16" r="4" fill="url(#nb-core)" filter="url(#nb-softglow)"/>
-      <circle cx="16" cy="16" r="2" fill="#e0e7ff" opacity="0.95" filter="url(#nb-glow)"/>
+        fill="none" stroke="#f0f9ff" strokeWidth="1.1" strokeLinecap="round" opacity="0.8" filter="url(#cn-glow)"/>
+      <circle cx="16" cy="16" r="4" fill="url(#cn-core)" filter="url(#cn-softglow)"/>
+      <circle cx="16" cy="16" r="2" fill="#e0e7ff" opacity="0.95" filter="url(#cn-glow)"/>
     </svg>
   );
 }
 
-export function Navbar() {
-  const [contactOpen, setContactOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const contactBtnRef = useRef<HTMLButtonElement>(null);
+// ── Nav data ─────────────────────────────────────────────────────────
+type CardLink = {
+  label: string;
+  ariaLabel: string;
+  sectionId?: string;
+  action?: 'contact' | 'resume';
+  href?: string;
+};
 
-  // PillNav refs
-  const circleRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const tlRefs = useRef<Array<gsap.core.Timeline | null>>([]);
-  const activeTweenRefs = useRef<Array<gsap.core.Tween | null>>([]);
-  const logoRef = useRef<HTMLAnchorElement | null>(null);
-  const logoSvgRef = useRef<SVGSVGElement | null>(null);
-  const logoTweenRef = useRef<gsap.core.Tween | null>(null);
-  const hamburgerRef = useRef<HTMLButtonElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const navItemsRef = useRef<HTMLDivElement>(null);
+type CardItem = {
+  label: string;
+  bgColor: string;
+  textColor: string;
+  links: CardLink[];
+};
+
+const CARD_ITEMS: CardItem[] = [
+  {
+    label: 'Projects',
+    bgColor: '#0f0a1e',
+    textColor: '#e0e7ff',
+    links: [
+      { label: 'Dev Projects',    ariaLabel: 'Dev projects',    sectionId: 'projects' },
+      { label: 'Featured Work',   ariaLabel: 'Featured work',   sectionId: 'projects' },
+    ],
+  },
+  {
+    label: 'Skills & Work',
+    bgColor: '#120d24',
+    textColor: '#e0e7ff',
+    links: [
+      { label: 'Skills',      ariaLabel: 'Skills section',      sectionId: 'skills' },
+      { label: 'Experience',  ariaLabel: 'Experience section',  sectionId: 'experience' },
+      { label: 'Certificates', ariaLabel: 'Certificates',       sectionId: 'certificates' },
+    ],
+  },
+  {
+    label: 'Contact',
+    bgColor: '#1a1133',
+    textColor: '#e0e7ff',
+    links: [
+      { label: 'Get in Touch', ariaLabel: 'Open contact form', action: 'contact' },
+      { label: 'Resume',       ariaLabel: 'View resume',       action: 'resume',  href: '/Subhankar_Choudhury_Resume.pdf' },
+      { label: 'GitHub',       ariaLabel: 'GitHub profile',    href: 'https://github.com/subhankarchoudhury' },
+    ],
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────────────
+export function Navbar() {
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+  const [isExpanded, setIsExpanded]           = useState(false);
+  const [contactOpen, setContactOpen]         = useState(false);
+  const contactBtnRef                         = useRef<HTMLButtonElement>(null);
+
+  const navRef    = useRef<HTMLDivElement>(null);
+  const cardsRef  = useRef<HTMLDivElement[]>([]);
+  const tlRef     = useRef<gsap.core.Timeline | null>(null);
+  const logoRef   = useRef<SVGSVGElement>(null);
+  const logoTween = useRef<gsap.core.Tween | null>(null);
 
   const ease = 'power3.out';
 
-  // Items excluding "Contact" (handled separately as a pill action)
-  const pillItems = NAV_ITEMS.filter(i => i.sectionId !== undefined || i.label === 'Contact');
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: NavItem) => {
-    e.preventDefault();
-    if (item.label === 'Contact') {
-      setContactOpen(true);
-      return;
-    }
-    const id = item.sectionId || item.href.replace('#', '');
-    const target = document.getElementById(id);
+  // ── Scroll helper ───────────────────────────────────────────────
+  const scrollTo = (sectionId: string) => {
+    const target = document.getElementById(sectionId);
     if (!target) return;
     const smoother = ScrollSmoother.get();
     if (smoother) smoother.scrollTo(target, true, 'top 80px');
     else target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Layout + GSAP pill animation setup
-  useEffect(() => {
-    const layout = () => {
-      circleRefs.current.forEach((circle, i) => {
-        if (!circle?.parentElement) return;
-        const pill = circle.parentElement as HTMLElement;
-        const { width: w, height: h } = pill.getBoundingClientRect();
-        const R = ((w * w) / 4 + h * h) / (2 * h);
-        const D = Math.ceil(2 * R) + 2;
-        const delta = Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
-        const originY = D - delta;
-
-        circle.style.width = `${D}px`;
-        circle.style.height = `${D}px`;
-        circle.style.bottom = `-${delta}px`;
-
-        gsap.set(circle, { xPercent: -50, scale: 0, transformOrigin: `50% ${originY}px` });
-
-        const label = pill.querySelector<HTMLElement>('.pill-label');
-        const hover = pill.querySelector<HTMLElement>('.pill-label-hover');
-        if (label) gsap.set(label, { y: 0 });
-        if (hover) gsap.set(hover, { y: h + 12, opacity: 0 });
-
-        tlRefs.current[i]?.kill();
-        const tl = gsap.timeline({ paused: true });
-        tl.to(circle, { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: 'auto' }, 0);
-        if (label) tl.to(label, { y: -(h + 8), duration: 2, ease, overwrite: 'auto' }, 0);
-        if (hover) {
-          gsap.set(hover, { y: Math.ceil(h + 100), opacity: 0 });
-          tl.to(hover, { y: 0, opacity: 1, duration: 2, ease, overwrite: 'auto' }, 0);
-        }
-        tlRefs.current[i] = tl;
-      });
-    };
-
-    layout();
-    window.addEventListener('resize', layout);
-    document.fonts?.ready.then(layout).catch(() => {});
-
-    // Entrance animation
-    const navItems = navItemsRef.current;
-    if (navItems) {
-      gsap.from(navItems, { opacity: 0, y: -12, duration: 0.6, ease, delay: 0.2 });
+  const handleLinkClick = (e: React.MouseEvent, link: CardLink) => {
+    e.preventDefault();
+    closeMenu();
+    if (link.action === 'contact') { setContactOpen(true); return; }
+    if (link.action === 'resume' || link.href?.startsWith('http')) {
+      window.open(link.href, '_blank', 'noopener noreferrer');
+      return;
     }
-    if (logoRef.current) {
-      gsap.from(logoRef.current, { opacity: 0, scale: 0.7, duration: 0.5, ease, delay: 0.1 });
-    }
-
-    // Mobile menu hidden by default
-    const menu = mobileMenuRef.current;
-    if (menu) gsap.set(menu, { visibility: 'hidden', opacity: 0 });
-
-    return () => window.removeEventListener('resize', layout);
-  }, []);
-
-  // Defer scroll trigger until smoother is ready
-  useEffect(() => {
-    let cancelled = false;
-    whenSmootherReady(() => { if (!cancelled) { /* scroll triggers can go here if needed */ } });
-    return () => { cancelled = true; };
-  }, []);
-
-  const handleEnter = (i: number) => {
-    const tl = tlRefs.current[i];
-    if (!tl) return;
-    activeTweenRefs.current[i]?.kill();
-    activeTweenRefs.current[i] = tl.tweenTo(tl.duration(), { duration: 0.3, ease, overwrite: 'auto' });
+    if (link.sectionId) scrollTo(link.sectionId);
   };
 
-  const handleLeave = (i: number) => {
-    const tl = tlRefs.current[i];
+  // ── GSAP timeline ───────────────────────────────────────────────
+  const calculateHeight = () => {
+    const navEl = navRef.current;
+    if (!navEl) return 260;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+      const contentEl = navEl.querySelector('.card-nav-content') as HTMLElement;
+      if (contentEl) {
+        const prev = { vis: contentEl.style.visibility, pe: contentEl.style.pointerEvents, pos: contentEl.style.position, h: contentEl.style.height };
+        Object.assign(contentEl.style, { visibility: 'visible', pointerEvents: 'auto', position: 'static', height: 'auto' });
+        void contentEl.offsetHeight;
+        const height = 60 + contentEl.scrollHeight + 16;
+        Object.assign(contentEl.style, { visibility: prev.vis, pointerEvents: prev.pe, position: prev.pos, height: prev.h });
+        return height;
+      }
+    }
+    return 260;
+  };
+
+  const createTimeline = () => {
+    const navEl = navRef.current;
+    if (!navEl) return null;
+    gsap.set(navEl, { height: 60, overflow: 'hidden' });
+    gsap.set(cardsRef.current, { y: 50, opacity: 0 });
+    const tl = gsap.timeline({ paused: true });
+    tl.to(navEl, { height: calculateHeight, duration: 0.4, ease });
+    tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1');
+    return tl;
+  };
+
+  useLayoutEffect(() => {
+    const tl = createTimeline();
+    tlRef.current = tl;
+    return () => { tl?.kill(); tlRef.current = null; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ease]);
+
+  useLayoutEffect(() => {
+    const handleResize = () => {
+      if (!tlRef.current) return;
+      if (isExpanded) {
+        gsap.set(navRef.current, { height: calculateHeight() });
+        tlRef.current.kill();
+        const tl = createTimeline();
+        if (tl) { tl.progress(1); tlRef.current = tl; }
+      } else {
+        tlRef.current.kill();
+        const tl = createTimeline();
+        if (tl) tlRef.current = tl;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded]);
+
+  // ── Menu toggle ─────────────────────────────────────────────────
+  const closeMenu = () => {
+    if (!isExpanded) return;
+    setIsHamburgerOpen(false);
+    const tl = tlRef.current;
+    if (tl) {
+      tl.eventCallback('onReverseComplete', () => setIsExpanded(false));
+      tl.reverse();
+    }
+  };
+
+  const toggleMenu = () => {
+    const tl = tlRef.current;
     if (!tl) return;
-    activeTweenRefs.current[i]?.kill();
-    activeTweenRefs.current[i] = tl.tweenTo(0, { duration: 0.2, ease, overwrite: 'auto' });
+    if (!isExpanded) {
+      setIsHamburgerOpen(true);
+      setIsExpanded(true);
+      tl.play(0);
+    } else {
+      setIsHamburgerOpen(false);
+      tl.eventCallback('onReverseComplete', () => setIsExpanded(false));
+      tl.reverse();
+    }
   };
 
   const handleLogoEnter = () => {
-    const svg = logoSvgRef.current;
-    if (!svg) return;
-    logoTweenRef.current?.kill();
-    gsap.set(svg, { rotate: 0 });
-    logoTweenRef.current = gsap.to(svg, { rotate: 360, duration: 0.5, ease, overwrite: 'auto' });
+    if (!logoRef.current) return;
+    logoTween.current?.kill();
+    gsap.set(logoRef.current, { rotate: 0 });
+    logoTween.current = gsap.to(logoRef.current, { rotate: 360, duration: 0.5, ease, overwrite: 'auto' });
   };
 
-  const toggleMobileMenu = () => {
-    const next = !isMobileMenuOpen;
-    setIsMobileMenuOpen(next);
-    const hamburger = hamburgerRef.current;
-    const menu = mobileMenuRef.current;
-
-    if (hamburger) {
-      const lines = hamburger.querySelectorAll('.hamburger-line');
-      if (next) {
-        gsap.to(lines[0], { rotation: 45, y: 3, duration: 0.3, ease });
-        gsap.to(lines[1], { rotation: -45, y: -3, duration: 0.3, ease });
-      } else {
-        gsap.to(lines[0], { rotation: 0, y: 0, duration: 0.3, ease });
-        gsap.to(lines[1], { rotation: 0, y: 0, duration: 0.3, ease });
-      }
-    }
-
-    if (menu) {
-      if (next) {
-        gsap.set(menu, { visibility: 'visible' });
-        gsap.fromTo(menu, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease });
-      } else {
-        gsap.to(menu, {
-          opacity: 0, y: 10, duration: 0.2, ease,
-          onComplete: () => { gsap.set(menu, { visibility: 'hidden' }); },
-        });
-      }
-    }
+  const setCardRef = (i: number) => (el: HTMLDivElement | null) => {
+    if (el) cardsRef.current[i] = el;
   };
-
-  // CSS custom properties for pill colours — indigo/zinc palette
-  const cssVars = {
-    '--base':       '#18181b',   // zinc-900
-    '--pill-bg':    '#6366f1',   // indigo-500
-    '--hover-text': '#18181b',   // zinc-900 (text on hover fill)
-    '--pill-text':  '#e0e7ff',   // indigo-100
-    '--nav-h':      '40px',
-    '--pill-pad-x': '16px',
-    '--pill-gap':   '4px',
-  } as React.CSSProperties;
-
-  const basePillClasses =
-    'relative overflow-hidden inline-flex items-center justify-center h-full no-underline rounded-full font-medium text-[13px] leading-[0] tracking-wide whitespace-nowrap cursor-pointer';
 
   return (
     <>
-      {/* ── PillNav ─────────────────────────────────────────────────── */}
-      <div
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-auto"
-        style={cssVars}
-      >
-        <nav className="flex items-center gap-2" aria-label="Primary">
+      <div className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[760px] z-50 top-4">
+        <nav
+          ref={navRef}
+          className="block h-[60px] p-0 rounded-2xl shadow-lg relative overflow-hidden will-change-[height] border border-zinc-800/60"
+          style={{ backgroundColor: '#0c0c14' }}
+        >
+          {/* ── Top bar ── */}
+          <div className="absolute inset-x-0 top-0 h-[60px] flex items-center justify-between px-3 z-[2]">
 
-          {/* Logo pill */}
-          <a
-            ref={logoRef}
-            href="#"
-            aria-label="Home"
-            onMouseEnter={handleLogoEnter}
-            onClick={e => handleNavClick(e as React.MouseEvent<HTMLAnchorElement>, NAV_ITEMS[0])}
-            className="rounded-full inline-flex items-center justify-center overflow-hidden flex-shrink-0 border border-zinc-800 hover:border-indigo-500/60 transition-colors duration-300"
-            style={{
-              width: 'var(--nav-h)',
-              height: 'var(--nav-h)',
-              background: 'var(--base)',
-            }}
-          >
-            <SpiralLogo size={26} />
-          </a>
+            {/* Logo */}
+            <a
+              href="#"
+              aria-label="Home"
+              onMouseEnter={handleLogoEnter}
+              onClick={e => { e.preventDefault(); scrollTo('hero'); closeMenu(); }}
+              className="inline-flex items-center justify-center rounded-xl hover:opacity-80 transition-opacity"
+            >
+              <SpiralLogo size={32} />
+            </a>
 
-          {/* Desktop pill strip */}
-          <div
-            ref={navItemsRef}
-            className="relative items-center rounded-full hidden md:flex border border-zinc-800"
-            style={{
-              height: 'var(--nav-h)',
-              background: 'var(--base)',
-            }}
-          >
-            <ul role="menubar" className="list-none flex items-stretch m-0 p-[3px] h-full" style={{ gap: 'var(--pill-gap)' }}>
-              {pillItems.map((item, i) => (
-                <li key={item.href} role="none" className="flex h-full">
-                  <a
-                    role="menuitem"
-                    href={item.href}
-                    onClick={e => {
-                      handleNavClick(e, item);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={basePillClasses}
-                    style={{
-                      background: 'var(--pill-bg)',
-                      color: 'var(--pill-text)',
-                      paddingLeft: 'var(--pill-pad-x)',
-                      paddingRight: 'var(--pill-pad-x)',
-                    }}
-                    aria-label={item.label}
-                    onMouseEnter={() => handleEnter(i)}
-                    onMouseLeave={() => handleLeave(i)}
-                  >
-                    {/* Ripple circle */}
-                    <span
-                      className="hover-circle absolute left-1/2 bottom-0 rounded-full z-[1] block pointer-events-none"
-                      style={{ background: 'var(--base)', willChange: 'transform' }}
-                      aria-hidden="true"
-                      ref={el => { circleRefs.current[i] = el; }}
-                    />
-                    {/* Label stack */}
-                    <span className="label-stack relative inline-block leading-[1] z-[2]">
-                      <span className="pill-label relative z-[2] inline-block leading-[1]" style={{ willChange: 'transform' }}>
-                        {item.label}
-                      </span>
-                      <span
-                        className="pill-label-hover absolute left-0 top-0 z-[3] inline-block"
-                        style={{ color: 'var(--hover-text)', willChange: 'transform, opacity' }}
-                        aria-hidden="true"
-                      >
-                        {item.label}
-                      </span>
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {/* Site name — desktop */}
+            <span className="hidden md:block absolute left-1/2 -translate-x-1/2 text-zinc-300 text-[13px] font-medium tracking-wide select-none">
+              Subhankar
+            </span>
+
+            {/* Right side: hamburger + CTA */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setContactOpen(true); closeMenu(); }}
+                className="hidden md:inline-flex items-center gap-1.5 px-4 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[13px] font-medium transition-colors duration-200 cursor-pointer border-0"
+              >
+                Contact me
+              </button>
+
+              {/* Hamburger */}
+              <button
+                type="button"
+                onClick={toggleMenu}
+                aria-label={isExpanded ? 'Close menu' : 'Open menu'}
+                aria-expanded={isExpanded}
+                className="h-9 w-9 flex flex-col items-center justify-center gap-[5px] rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 transition-colors cursor-pointer border-0"
+              >
+                <span
+                  className={`hamburger-line w-[18px] h-[2px] bg-zinc-300 rounded origin-center transition-transform duration-300 ${isHamburgerOpen ? 'translate-y-[3.5px] rotate-45' : ''}`}
+                />
+                <span
+                  className={`hamburger-line w-[18px] h-[2px] bg-zinc-300 rounded origin-center transition-transform duration-300 ${isHamburgerOpen ? '-translate-y-[3.5px] -rotate-45' : ''}`}
+                />
+              </button>
+            </div>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            ref={hamburgerRef}
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-            aria-expanded={isMobileMenuOpen}
-            className="md:hidden rounded-full border border-zinc-800 flex flex-col items-center justify-center gap-1 cursor-pointer p-0 flex-shrink-0"
-            style={{
-              width: 'var(--nav-h)',
-              height: 'var(--nav-h)',
-              background: 'var(--base)',
-            }}
+          {/* ── Card grid ── */}
+          <div
+            className={`card-nav-content absolute left-0 right-0 top-[60px] bottom-0 p-2 flex flex-col md:flex-row items-stretch gap-2 z-[1] ${
+              isExpanded ? 'visible pointer-events-auto' : 'invisible pointer-events-none'
+            }`}
+            aria-hidden={!isExpanded}
           >
-            <span className="hamburger-line w-4 h-0.5 rounded bg-indigo-400 origin-center" />
-            <span className="hamburger-line w-4 h-0.5 rounded bg-indigo-400 origin-center" />
-          </button>
-        </nav>
-
-        {/* Mobile dropdown */}
-        <div
-          ref={mobileMenuRef}
-          className="md:hidden absolute top-[calc(var(--nav-h)+8px)] left-0 right-0 rounded-2xl border border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-[998] origin-top overflow-hidden"
-          style={{ background: 'var(--base)' }}
-        >
-          <ul className="list-none m-0 p-2 flex flex-col gap-1">
-            {pillItems.map(item => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  onClick={e => {
-                    handleNavClick(e, item);
-                    toggleMobileMenu();
-                  }}
-                  className="block py-2.5 px-4 text-[14px] font-medium rounded-xl text-indigo-200 hover:bg-indigo-500/20 hover:text-indigo-100 transition-all duration-200"
-                >
+            {CARD_ITEMS.map((item, idx) => (
+              <div
+                key={item.label}
+                ref={setCardRef(idx)}
+                className="relative flex flex-col gap-2 p-3 rounded-xl flex-1 min-h-[60px] md:min-h-0"
+                style={{ backgroundColor: item.bgColor, color: item.textColor }}
+              >
+                {/* Card label */}
+                <div className="font-medium tracking-tight text-[16px] md:text-[18px] text-indigo-200/80">
                   {item.label}
-                </a>
-              </li>
+                </div>
+
+                {/* Links */}
+                <div className="mt-auto flex flex-col gap-1">
+                  {item.links.map((link) => (
+                    <a
+                      key={link.label}
+                      href={link.href || '#'}
+                      aria-label={link.ariaLabel}
+                      onClick={e => handleLinkClick(e, link)}
+                      className="inline-flex items-center gap-1.5 text-[14px] text-zinc-300 hover:text-indigo-300 transition-colors duration-200 cursor-pointer no-underline group"
+                    >
+                      <GoArrowUpRight
+                        className="shrink-0 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200"
+                        aria-hidden="true"
+                      />
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
             ))}
-          </ul>
-        </div>
+          </div>
+        </nav>
       </div>
 
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} anchorRef={contactBtnRef} />
