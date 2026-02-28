@@ -20,7 +20,12 @@ const playfairDisplay = Playfair_Display({
   style: ["italic"],
 });
 
+const siteUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Subhankar — Blockchain & Full-Stack Engineer",
   description:
     "Portfolio of Subhankar — Blockchain/Web3 engineer and design-focused full-stack developer building at the intersection of DeFi, privacy tech, and beautiful UI/UX.",
@@ -29,6 +34,8 @@ export const metadata: Metadata = {
     description:
       "Blockchain/Web3 engineer and design-focused full-stack developer building at the intersection of DeFi, privacy tech, and beautiful UI/UX.",
     type: "website",
+    url: siteUrl,
+    siteName: "Subhankar's Portfolio",
     locale: "en_US",
   },
   twitter: {
@@ -40,6 +47,32 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Subhankar Choudhury",
+  url: siteUrl,
+  jobTitle: "Blockchain & Full-Stack Engineer",
+  description:
+    "Blockchain/Web3 engineer and design-focused full-stack developer building at the intersection of DeFi, privacy tech, and beautiful UI/UX.",
+  sameAs: [
+    "https://github.com/subhankarchoudhury",
+    "https://twitter.com/SsubhankarX",
+    "https://linkedin.com/in/subhankar-choudhury",
+  ],
+  knowsAbout: [
+    "Blockchain",
+    "Web3",
+    "Solidity",
+    "React",
+    "Next.js",
+    "TypeScript",
+    "DeFi",
+    "Zero Knowledge Proofs",
+    "Full-Stack Development",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,6 +80,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${hankenGrotesk.variable} ${geistMono.variable} ${playfairDisplay.variable} antialiased`}
       >
