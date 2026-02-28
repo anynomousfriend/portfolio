@@ -22,7 +22,7 @@ const playfairDisplay = Playfair_Display({
 
 const siteUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+  : "https://subhankarchoudhury.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

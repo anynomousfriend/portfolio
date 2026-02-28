@@ -126,6 +126,7 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
+      id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24"
     >
       {/* ColorBends WebGL background */}

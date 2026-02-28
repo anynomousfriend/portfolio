@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { GoArrowUpRight } from 'react-icons/go';
+import { Button } from '@/components/ui/button';
 import { ContactModal } from '@/components/ui/contact-modal';
 
 // ── Spiral SVG Logo (matches icon.svg) ──────────────────────────────
@@ -69,6 +70,8 @@ type CardItem = {
   bgColor: string;
   textColor: string;
   links: CardLink[];
+  sectionId?: string;
+  action?: 'contact';
 };
 
 const CARD_ITEMS: CardItem[] = [
@@ -76,29 +79,33 @@ const CARD_ITEMS: CardItem[] = [
     label: 'Projects',
     bgColor: '#0f0a1e',
     textColor: '#e0e7ff',
+    sectionId: 'projects',
     links: [
-      { label: 'Dev Projects',    ariaLabel: 'Dev projects',    sectionId: 'projects' },
-      { label: 'Featured Work',   ariaLabel: 'Featured work',   sectionId: 'projects' },
+      { label: 'Dev Projects',  ariaLabel: 'Dev projects',  sectionId: 'projects' },
+      { label: 'Featured Work', ariaLabel: 'Featured work', sectionId: 'projects' },
     ],
   },
   {
     label: 'Skills & Work',
     bgColor: '#120d24',
     textColor: '#e0e7ff',
+    sectionId: 'skills',
     links: [
-      { label: 'Skills',      ariaLabel: 'Skills section',      sectionId: 'skills' },
-      { label: 'Experience',  ariaLabel: 'Experience section',  sectionId: 'experience' },
-      { label: 'Certificates', ariaLabel: 'Certificates',       sectionId: 'certificates' },
+      { label: 'Skills',        ariaLabel: 'Skills section',        sectionId: 'skills' },
+      { label: 'Experience',    ariaLabel: 'Experience section',    sectionId: 'experience' },
+      { label: 'Certificates',  ariaLabel: 'Certificates section',  sectionId: 'certificates' },
     ],
   },
   {
     label: 'Contact',
     bgColor: '#1a1133',
     textColor: '#e0e7ff',
+    action: 'contact',
     links: [
-      { label: 'Get in Touch', ariaLabel: 'Open contact form', action: 'contact' },
-      { label: 'Resume',       ariaLabel: 'View resume',       action: 'resume',  href: '/Subhankar_Choudhury_Resume.pdf' },
-      { label: 'GitHub',       ariaLabel: 'GitHub profile',    href: 'https://github.com/subhankarchoudhury' },
+      { label: 'Email',         ariaLabel: 'Send an email',            href: 'mailto:officialsubhankar01@gmail.com' },
+      { label: 'Telegram',      ariaLabel: 'Telegram @Sshubhankar',    href: 'https://t.me/Sshubhankar' },
+      { label: 'Resume',        ariaLabel: 'View resume',              action: 'resume', href: '/Subhankar_Choudhury_Resume.pdf' },
+      { label: 'GitHub',        ariaLabel: 'GitHub profile',           href: 'https://github.com/subhankarchoudhury' },
     ],
   },
 ];
@@ -117,6 +124,7 @@ export function Navbar() {
   const logoTween = useRef<gsap.core.Tween | null>(null);
 
   const ease = 'power3.out';
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // ── Scroll helper ───────────────────────────────────────────────
   const scrollTo = (sectionId: string) => {
@@ -131,12 +139,28 @@ export function Navbar() {
     e.preventDefault();
     closeMenu();
     if (link.action === 'contact') { setContactOpen(true); return; }
+    if (link.href?.startsWith('mailto:')) {
+      window.location.href = link.href;
+      return;
+    }
     if (link.action === 'resume' || link.href?.startsWith('http')) {
       window.open(link.href, '_blank', 'noopener noreferrer');
       return;
     }
     if (link.sectionId) scrollTo(link.sectionId);
   };
+
+  // ── Click outside to close ──────────────────────────────────────
+  useLayoutEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        closeMenu();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded]);
 
   // ── GSAP timeline ───────────────────────────────────────────────
   const calculateHeight = () => {
@@ -232,7 +256,7 @@ export function Navbar() {
 
   return (
     <>
-      <div className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[760px] z-50 top-4">
+      <div ref={containerRef} className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[760px] z-50 top-4">
         <nav
           ref={navRef}
           className="block h-[60px] p-0 rounded-2xl shadow-lg relative overflow-hidden will-change-[height] border border-zinc-800/60"
@@ -241,31 +265,33 @@ export function Navbar() {
           {/* ── Top bar ── */}
           <div className="absolute inset-x-0 top-0 h-[60px] flex items-center justify-between px-3 z-[2]">
 
-            {/* Logo */}
+            {/* Left: Logo + name */}
             <a
               href="#"
               aria-label="Home"
               onMouseEnter={handleLogoEnter}
               onClick={e => { e.preventDefault(); scrollTo('hero'); closeMenu(); }}
-              className="inline-flex items-center justify-center rounded-xl hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 select-none no-underline hover:opacity-80 transition-opacity"
             >
-              <SpiralLogo size={32} />
+              <SpiralLogo size={28} />
+              <span className="hidden md:flex items-baseline gap-0">
+                <span className="text-[15px] font-semibold text-zinc-100 tracking-tight leading-none">
+                  Subhankar
+                </span>
+                <span className="text-indigo-400 text-[15px] font-bold leading-none">.</span>
+              </span>
             </a>
 
-            {/* Site name — desktop */}
-            <span className="hidden md:block absolute left-1/2 -translate-x-1/2 text-zinc-300 text-[13px] font-medium tracking-wide select-none">
-              Subhankar
-            </span>
-
-            {/* Right side: hamburger + CTA */}
+            {/* Right: Contact CTA + hamburger */}
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <Button
+                ref={contactBtnRef}
+                size="sm"
                 onClick={() => { setContactOpen(true); closeMenu(); }}
-                className="hidden md:inline-flex items-center gap-1.5 px-4 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[13px] font-medium transition-colors duration-200 cursor-pointer border-0"
+                className="hidden md:inline-flex"
               >
                 Contact me
-              </button>
+              </Button>
 
               {/* Hamburger */}
               <button
@@ -296,12 +322,18 @@ export function Navbar() {
               <div
                 key={item.label}
                 ref={setCardRef(idx)}
-                className="relative flex flex-col gap-2 p-3 rounded-xl flex-1 min-h-[60px] md:min-h-0"
+                className="relative flex flex-col gap-2 p-3 rounded-xl flex-1 min-h-[60px] md:min-h-0 border border-zinc-800/40 hover:border-indigo-500/50 transition-colors duration-300"
                 style={{ backgroundColor: item.bgColor, color: item.textColor }}
               >
                 {/* Card label */}
-                <div className="font-medium tracking-tight text-[16px] md:text-[18px] text-indigo-200/80">
-                  {item.label}
+                <div
+                  className="font-medium tracking-tight text-[16px] md:text-[18px] text-indigo-200/80 cursor-pointer hover:text-indigo-300 transition-colors duration-200"
+                  onClick={() => {
+                    if (item.action === 'contact') { setContactOpen(true); closeMenu(); }
+                    else if (item.sectionId) { scrollTo(item.sectionId); closeMenu(); }
+                  }}
+                >
+                  {item.label} ↗
                 </div>
 
                 {/* Links */}
