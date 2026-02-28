@@ -105,7 +105,7 @@ const CARD_ITEMS: CardItem[] = [
       { label: 'Email',         ariaLabel: 'Send an email',            href: 'mailto:officialsubhankar01@gmail.com' },
       { label: 'Telegram',      ariaLabel: 'Telegram @Sshubhankar',    href: 'https://t.me/Sshubhankar' },
       { label: 'Resume',        ariaLabel: 'View resume',              action: 'resume', href: '/Subhankar_Choudhury_Resume.pdf' },
-      { label: 'GitHub',        ariaLabel: 'GitHub profile',           href: 'https://github.com/subhankarchoudhury' },
+      { label: 'GitHub',        ariaLabel: 'GitHub profile',           href: 'https://github.com/anynomousfriend' },
     ],
   },
 ];
