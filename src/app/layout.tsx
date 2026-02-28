@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/OG-Preview.png",
+        url: `${siteUrl}/OG-Preview.png`,
         width: 1200,
         height: 630,
         alt: "Subhankar — Blockchain & Full-Stack Engineer",
@@ -51,6 +51,7 @@ export const metadata: Metadata = {
     description:
       "Blockchain/Web3 engineer and design-focused full-stack developer building at the intersection of DeFi, privacy tech, and beautiful UI/UX.",
     creator: "@SsubhankarX",
+    images: [`${siteUrl}/OG-Preview.png`],
   },
 };
 
