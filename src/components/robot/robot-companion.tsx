@@ -188,32 +188,34 @@ export function RobotCompanion() {
                   </div>
                 ) : (
                   /* Offer state — clickable */
-                  <button
-                    onClick={handleResumeBubbleOpen}
-                    className="group relative flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl bg-zinc-900/95 border border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.18)] backdrop-blur-xl cursor-pointer hover:border-indigo-400/70 hover:shadow-[0_0_28px_rgba(99,102,241,0.28)] transition-all w-full text-left"
-                  >
-                    {/* Glow line */}
-                    <div className="absolute -top-px left-1/2 -translate-x-1/2 w-20 h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent rounded-full" />
-
-                    <span className="text-[11px] font-semibold text-zinc-100 leading-tight whitespace-nowrap">
-                      📄 Want my résumé?
-                    </span>
-                    <span className="text-[9px] text-indigo-400 font-mono leading-tight whitespace-nowrap group-hover:text-indigo-300 transition-colors">
-                      Click to view →
-                    </span>
-
+                  <div className="relative w-full">
                     {/* Dismiss × */}
                     <button
                       onClick={handleResumeBubbleDismiss}
-                      className="absolute -top-2 -right-2 size-4 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-all text-[9px] leading-none"
+                      className="absolute -top-2 -right-2 size-4 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-all text-[9px] leading-none z-10"
                       aria-label="Dismiss"
                     >
                       ×
                     </button>
 
-                    {/* Tail pointer pointing down to robot */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-indigo-500/40" />
-                  </button>
+                    <button
+                      onClick={handleResumeBubbleOpen}
+                      className="group relative flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl bg-zinc-900/95 border border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.18)] backdrop-blur-xl cursor-pointer hover:border-indigo-400/70 hover:shadow-[0_0_28px_rgba(99,102,241,0.28)] transition-all w-full text-left"
+                    >
+                      {/* Glow line */}
+                      <div className="absolute -top-px left-1/2 -translate-x-1/2 w-20 h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent rounded-full" />
+
+                      <span className="text-[11px] font-semibold text-zinc-100 leading-tight whitespace-nowrap">
+                        📄 Want my résumé?
+                      </span>
+                      <span className="text-[9px] text-indigo-400 font-mono leading-tight whitespace-nowrap group-hover:text-indigo-300 transition-colors">
+                        Click to view →
+                      </span>
+
+                      {/* Tail pointer pointing down to robot */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-indigo-500/40" />
+                    </button>
+                  </div>
                 )}
               </motion.div>
             )}
