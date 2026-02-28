@@ -11,6 +11,8 @@ export function useRobotBehavior() {
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<Position>({ x: 0, y: 0 });
   const [target, setTarget] = useState<Position>({ x: 0, y: 0 });
+  // Keep ref in sync so animation loop can read it without a dependency
+  useEffect(() => { targetRef.current = target; }, [target]);
   const posRef = useRef<Position>({ x: 0, y: 0 });
 
   // Initialize position on mount (client-only) to avoid hydration mismatch
@@ -26,8 +28,12 @@ export function useRobotBehavior() {
   const [mousePos, setMousePos] = useState<Position>({ x: 0, y: 0 });
   const [isCatching, setIsCatching] = useState(false);
   const [workMode, setWorkMode] = useState<WorkMode>('none');
+  // Keep ref in sync so animation loop can read it without a dependency
+  useEffect(() => { workModeRef.current = workMode; }, [workMode]);
   const [workAction, setWorkAction] = useState<WorkAction>('none');
   const [isMoving, setIsMoving] = useState(false);
+  // Keep ref in sync so animation loop can read it without a dependency
+  useEffect(() => { isMovingRef.current = isMoving; }, [isMoving]);
   const [facingRight, setFacingRight] = useState(false);
   const [expression, setExpression] = useState<RobotExpression>('idle');
   const [clickCount, setClickCount] = useState(0);
@@ -43,6 +49,9 @@ export function useRobotBehavior() {
   const techBadgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const spawnBubblesSequenceRef = useRef<() => void>(() => {});
   const certTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMovingRef = useRef(false);
+  const workModeRef = useRef<WorkMode>('none');
+  const targetRef = useRef<Position>({ x: 0, y: 0 });
 
   const pathname = usePathname();
 
@@ -566,20 +575,26 @@ export function useRobotBehavior() {
     return () => clearTimeout(idleTimer);
   }, [isMoving, expression, isCatching, workMode, isNightOwl, spawnBubblesSequence]);
 
-  // Animation loop for movement
+  // Animation loop for movement — uses refs only to avoid infinite re-render loops
   useEffect(() => {
     let frameId: number;
 
     const animate = () => {
+      // Read latest values from refs — no state dependencies needed
+      if (!isMovingRef.current) return;
+
       setPos((prev) => {
-        const dx = target.x - prev.x;
-        const dy = target.y - prev.y;
+        const dx = targetRef.current.x - prev.x;
+        const dy = targetRef.current.y - prev.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < 5) {
-          if (isMoving) {
+          // Arrived — schedule state updates outside the updater
+          setTimeout(() => {
+            if (!isMovingRef.current) return;
+            isMovingRef.current = false;
             setIsMoving(false);
-            if (workMode === 'none') {
+            if (workModeRef.current === 'none') {
               setExpression('happy');
               setTimeout(() => {
                 setExpression((prevExp) =>
@@ -587,7 +602,7 @@ export function useRobotBehavior() {
                 );
               }, 2000);
             }
-          }
+          }, 0);
           return prev;
         }
 
@@ -603,17 +618,16 @@ export function useRobotBehavior() {
         return nextPos;
       });
 
-      if (isMoving) {
-        frameId = requestAnimationFrame(animate);
-      }
+      frameId = requestAnimationFrame(animate);
     };
 
     if (isMoving) {
+      isMovingRef.current = true;
       frameId = requestAnimationFrame(animate);
     }
 
     return () => cancelAnimationFrame(frameId);
-  }, [target, isMoving, workMode]);
+  }, [isMoving]);
 
   return {
     pos,
