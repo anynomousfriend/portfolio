@@ -37,6 +37,14 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Subhankar's Portfolio",
     locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Subhankar — Blockchain & Full-Stack Engineer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -44,6 +52,7 @@ export const metadata: Metadata = {
     description:
       "Blockchain/Web3 engineer and design-focused full-stack developer building at the intersection of DeFi, privacy tech, and beautiful UI/UX.",
     creator: "@SsubhankarX",
+    images: ["/opengraph-image"],
   },
 };
 
