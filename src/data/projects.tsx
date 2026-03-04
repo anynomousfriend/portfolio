@@ -9,6 +9,7 @@ import {
   LLMChessVisual,
   AFOVisual,
   FathomVisual,
+  AttastaraVisual,
   PoolFundersVisual,
   FoliobullVisual,
 } from '@/components/ui/project-visuals';
@@ -35,6 +36,68 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
   dev: [
     {
       id: 1,
+      title: 'Attestara',
+      slug: 'attestara',
+      liveUrl: 'https://attestara-frontend.vercel.app/',
+      githubUrl: 'https://github.com/anynomousfriend/Attestara',
+      githubRepo: 'anynomousfriend/Attestara',
+      desc: 'CRE-orchestrated compliance layer for institutional DeFi — real-time AML screening, EIP-712 attestations, and Tenderly-simulated vault deposits with zero on-chain PII exposure.',
+      tags: ['TypeScript', 'Solidity', 'Next.js', 'Tenderly', 'EIP-712'],
+      coverImage: '/attestara-cover.webp',
+      visual: <PolishedImageVisual imageUrl="/attestara-cover.webp" fallbackAlt="Attestara Preview" gradientColors={['#022c22', '#064e3b', '#065f46']} hoverVisual={<AttastaraVisual />} />,
+      caseStudy: `# Attestara
+
+## The Problem
+
+Institutional DeFi requires AML/KYC compliance before every deposit — but storing compliance data on-chain exposes sensitive personal information permanently. Existing permissioned vault designs (like Aave Arc) use static whitelists that can't enforce per-transaction compliance checks.
+
+## The Solution
+
+Attestara is a CRE-orchestrated compliance middleware stack that sits between institutions and a permissioned vault. It enforces real-time AML/KYC checks without ever writing personal data on-chain — only cryptographic commitments.
+
+## What I Built
+
+### Compliance & Routing Engine (CRE)
+An off-chain Node.js enclave that orchestrates the full compliance flow: AML screening via Chainalysis KYT (or mock server), EIP-712 attestation signing, Tenderly transaction simulation, and on-chain relay. Every deposit is pre-flighted — if it would revert, the user sees the decoded reason before spending gas.
+
+### EIP-712 Attestation System
+The CRE signs a \`ComplianceAttestation\` struct containing only a \`keccak256\` hash of the AML report, the subject address, an expiry timestamp, and a one-time nonce. The vault verifies the signature on-chain. No PII, ever.
+
+\`\`\`
+Off-chain: full AML report (name, risk score, sanctions lists)
+On-chain:  keccak256(report) + subject + expiry + nonce + CRE signature
+\`\`\`
+
+### Smart Contracts (Solidity)
+Three contracts deployed on a Tenderly Virtual TestNet (Ethereum mainnet fork):
+- **DIDRegistry** — institutions register a DID before depositing
+- **ComplianceAttestationVerifier** — validates EIP-712 signatures and burns nonces after use
+- **PermissionedVault** — ERC-4626-inspired vault with mandatory compliance gate per deposit
+
+### Tenderly Integration
+Used Tenderly for four things: Virtual TestNet hosting (mainnet fork), pre-deposit transaction simulation, execution trace analysis for gas dashboards, and webhooks for real-time revocation detection.
+
+### Compliance Dashboard (Next.js)
+Full-featured frontend at \`/app\` with a TransactionStepper, live AML logs, vault stats, adversarial scenario showcase (OFAC-blocked wallet, expired attestation, nonce replay), and per-call-frame gas breakdown.
+
+## Technical Challenges
+
+**Replay attack prevention** — Each attestation embeds a 128-bit random nonce. The \`ComplianceAttestationVerifier\` atomically marks it spent during the deposit transaction. A compromised attestation cannot be reused.
+
+**15-minute TTL** — Attestations expire after 15 minutes by default, limiting the window for misuse. The simulation step validates expiry before the transaction is submitted.
+
+**Mock AML rules** — Built a pluggable AML adapter supporting both the mock server and real Chainalysis KYT. The mock applies deterministic rules (OFAC patterns, mixer heuristics, large-amount flags) for demo reproducibility.
+
+## Impact
+
+- Zero PII on-chain — regulators can verify compliance occurred without reconstructing AML findings
+- Per-transaction compliance enforcement — not a static whitelist
+- Full adversarial scenario demo — OFAC block, nonce replay, attestation expiry, vault pause
+- Production-pattern middleware deployable against any ERC-20 vault
+`,
+    },
+    {
+      id: 2,
       featured: true,
       title: 'PayPerRequest',
       slug: 'pay-per-request',
@@ -88,7 +151,7 @@ Real-time payment tracking UI built with Wagmi, RainbowKit, and DaisyUI. Display
 `,
     },
     {
-      id: 2,
+      id: 3,
       featured: true,
       title: 'Temporal Vault',
       slug: 'temporal-vault',
@@ -149,7 +212,7 @@ React frontend integrating both Ethereum (Wagmi) and Stacks (Connect) wallets si
 `,
     },
     {
-      id: 3,
+      id: 4,
       title: 'ZK Parental Consent Gateway',
       slug: 'zk-consent-gateway',
       githubUrl: 'https://github.com/anynomousfriend/ZK-parental-consent',
@@ -205,7 +268,7 @@ npm run fund:wallet
 `,
     },
     {
-      id: 4,
+      id: 5,
       title: 'ZenResume',
       slug: 'zen-resume',
       liveUrl: 'https://zen-resume-phi.vercel.app/',
@@ -269,7 +332,7 @@ Inspired by Japanese aesthetics — MA (negative space), KANSO (simplicity), SHI
 `,
     },
     {
-      id: 5,
+      id: 6,
       title: 'LLM Chess Arena',
       slug: 'llm-chess-arena',
       githubUrl: 'https://github.com/anynomousfriend/LLM-Chess-Arena',
@@ -336,7 +399,7 @@ def handle_move(data):
 `,
     },
     {
-      id: 6,
+      id: 7,
       title: 'iExec Confidential iApp',
       slug: 'iexec-iapp',
       githubUrl: 'https://github.com/anynomousfriend/TheunshakableHand',
@@ -400,7 +463,7 @@ Automated scripts for app registration, TEE framework configuration (Scone), ord
 `,
     },
     {
-      id: 7,
+      id: 8,
       title: 'AFO — Atomic Fair Ordering',
       slug: 'afo-qubic',
       liveUrl: 'https://afo-qubic.vercel.app/',
@@ -443,7 +506,7 @@ Integrated automated market maker that demonstrates the practical impact: identi
 `,
     },
     {
-      id: 8,
+      id: 9,
       featured: true,
       title: 'Fathom-0x Protocol',
       slug: 'fathom-0x',

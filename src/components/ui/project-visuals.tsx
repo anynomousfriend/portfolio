@@ -1084,7 +1084,121 @@ export function FathomVisual() {
   );
 }
 
-// ─── 9. PoolFunders ────────────────────────────────────────────────────────────
+// ─── 9. Attestara ──────────────────────────────────────────────────────────────
+export function AttastaraVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  return (
+    <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
+      {/* header */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35 }}
+          className="flex items-center justify-between"
+        >
+          <span className="text-[7px] text-emerald-400 font-mono tracking-wider">Ψ ATTESTARA</span>
+          <div className="flex items-center gap-1">
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.4, repeat: Infinity }}
+            />
+            <span className="text-[6px] text-emerald-400 font-mono">CRE Active</span>
+          </div>
+        </motion.div>
+      ) : (
+        <Skeleton className="h-2 w-3/4" />
+      )}
+
+      {/* Architecture flow: Institution → CRE → Vault */}
+      {inView ? (
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={container}
+          className="flex items-center gap-1"
+        >
+          {[
+            { label: 'Institution', sub: 'wallet', color: 'text-zinc-300', border: 'border-zinc-500/30', bg: 'bg-zinc-500/10' },
+            { label: 'CRE', sub: 'AML + EIP-712', color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
+            { label: 'Vault', sub: 'on-chain', color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
+          ].map(({ label, sub, color, border, bg }, i) => (
+            <div key={label} className="flex items-center gap-1 flex-1">
+              <motion.div variants={item} className={`flex-1 ${bg} border ${border} rounded-sm p-1 text-center`}>
+                <div className={`text-[6px] font-mono font-bold ${color}`}>{label}</div>
+                <div className="text-[5px] text-zinc-500 font-mono">{sub}</div>
+              </motion.div>
+              {i < 2 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + i * 0.2 }}
+                  className="relative flex items-center"
+                >
+                  <motion.div
+                    className="w-1 h-1 rounded-full bg-emerald-400"
+                    animate={{ x: [0, 6, 0] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: 'linear', delay: i * 0.4 }}
+                  />
+                </motion.div>
+              )}
+            </div>
+          ))}
+        </motion.div>
+      ) : (
+        <Skeleton className="h-10" />
+      )}
+
+      {/* Privacy model code block */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex-1 bg-zinc-900 rounded-sm border border-zinc-800 p-2 font-mono text-[7px] flex flex-col gap-0.5"
+        >
+          <div className="text-zinc-600">{'// privacy model'}</div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
+            <span className="text-zinc-400">amlReport  </span>
+            <span className="text-red-400">{'→ off-chain only'}</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+            <span className="text-zinc-400">on-chain   </span>
+            <span className="text-emerald-400">keccak256</span>
+            <span className="text-zinc-300">(report)</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}>
+            <span className="text-zinc-400">sig        </span>
+            <span className="text-blue-400">EIP-712</span>
+            <span className="text-zinc-500"> ✓ verified</span>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.0 }} className="text-zinc-600">
+            {'// PII: never on-chain'}
+          </motion.div>
+        </motion.div>
+      ) : (
+        <Skeleton className="flex-1" />
+      )}
+
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          className="flex justify-between"
+        >
+          <span className="text-[6px] text-zinc-600 font-mono">AML · KYC · EIP-712</span>
+          <span className="text-[6px] text-emerald-400 font-mono">Zero on-chain exposure</span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ─── 10. PoolFunders ───────────────────────────────────────────────────────────
 export function PoolFundersVisual() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
