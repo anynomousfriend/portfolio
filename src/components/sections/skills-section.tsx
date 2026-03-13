@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { onSmootherReady } from '@/lib/smoother-ready';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 import { skills } from '@/data/skills';
 import { SkillCard } from '@/components/ui/skill-card';
 
@@ -15,11 +15,10 @@ export function SkillsSection() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let scrollCtx: gsap.Context | null = null;
     let cancelled = false;
 
-    const setupAnimations = async () => {
-      await onSmootherReady();
+    whenSmootherReady(() => {
       if (cancelled) return;
 
       const section = sectionRef.current;
@@ -65,9 +64,7 @@ export function SkillsSection() {
           },
         });
       }, sectionRef);
-    };
-
-    setupAnimations();
+    });
 
     return () => {
       cancelled = true;

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { onSmootherReady } from '@/lib/smoother-ready';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 import { ExternalLink, Award } from 'lucide-react';
 import { certificates } from '@/data/certificates';
 
@@ -14,11 +14,10 @@ export function CertificatesSection() {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let scrollCtx: gsap.Context | null = null;
     let cancelled = false;
 
-    const setupAnimations = async () => {
-      await onSmootherReady();
+    whenSmootherReady(() => {
       if (cancelled) return;
 
       const header = headerRef.current;
@@ -57,9 +56,7 @@ export function CertificatesSection() {
           }
         );
       }, sectionRef);
-    };
-
-    setupAnimations();
+    });
 
     return () => {
       cancelled = true;

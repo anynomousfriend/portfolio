@@ -1,33 +1,34 @@
 /**
- * smoother-ready.ts
+ * Pub/sub for ScrollSmoother lifecycle.
  *
- * A module-level promise that resolves once ScrollSmoother.create() has fully
- * completed and its scroller proxy is registered with ScrollTrigger.
+ * - Components call whenSmootherReady(cb) to defer animation setup.
+ * - SmoothScrollProvider calls signalSmootherReady() after creating the instance.
+ * - resetSmootherReady() flushes all stale callbacks on teardown.
  */
 
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
+let ready = false;
+let pending: Array<() => void> = [];
 
-let smootherInstance: ScrollSmoother | null = null;
-let listeners: Array<() => void> = [];
-
-export function setSmootherInstance(instance: ScrollSmoother | null) {
-  if (!instance) {
-    smootherInstance = null;
-    listeners = [];          // ← FLUSH pending listeners when smoother is destroyed
-    return;
-  }
-
-  smootherInstance = instance;
-
-  // Drain the queue
-  const pending = listeners;
-  listeners = [];            // ← clear BEFORE calling to avoid re-entrancy
-  pending.forEach((cb) => cb());
+/** Called by SmoothScrollProvider after ScrollSmoother.create() */
+export function signalSmootherReady(): void {
+  ready = true;
+  const callbacks = [...pending];
+  pending = [];
+  // rAF guarantees DOM is painted before animation code touches elements
+  requestAnimationFrame(() => callbacks.forEach((cb) => cb()));
 }
 
-export function onSmootherReady(): Promise<void> {
-  if (smootherInstance) return Promise.resolve();
-  return new Promise<void>((resolve) => {
-    listeners.push(resolve);
-  });
+/** Called by SmoothScrollProvider cleanup — discards every queued callback */
+export function resetSmootherReady(): void {
+  ready = false;
+  pending = []; // dead components' callbacks are silently dropped
+}
+
+/** Run `cb` once the smoother exists. Safe to call before or after creation. */
+export function whenSmootherReady(cb: () => void): void {
+  if (ready) {
+    requestAnimationFrame(() => cb());
+  } else {
+    pending.push(cb);
+  }
 }

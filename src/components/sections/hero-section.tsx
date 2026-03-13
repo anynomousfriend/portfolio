@@ -9,7 +9,7 @@ import GradualBlur from '@/components/ui/gradual-blur';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { onSmootherReady } from '@/lib/smoother-ready';
+import { whenSmootherReady } from '@/lib/smoother-ready';
 
 // ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
 // Do NOT call registerPlugin here — re-registering ScrollTrigger alone after
@@ -86,18 +86,26 @@ export function HeroSection() {
     // cases where the smoother was already created before this effect ran.
     // scrollCtx is created fresh inside setupScrollBlurOut — AFTER the smoother
     // is ready — so it never captures a stale scroller proxy reference.
-    let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let scrollCtx: gsap.Context | null = null;
     let cancelled = false;
 
-    const setupScrollBlurOut = async () => {
-      await onSmootherReady();
+    whenSmootherReady(() => {
       if (cancelled) return;
 
-      // Guard: component may have unmounted before the promise resolved
       const section = sectionRef.current;
       if (!section) return;
 
-      // Create a brand-new context here
+      // Build targets array — filter out null AND undefined
+      const fadeElements = [
+        badgeRef.current,
+        headlineRef.current,
+        valuePropRef.current,
+        ctasRef.current,
+        badgeInnerRef.current,
+      ].filter((el): el is HTMLDivElement | HTMLHeadingElement | HTMLParagraphElement => el !== null);
+
+      if (fadeElements.length === 0) return;
+
       scrollCtx = gsap.context(() => {
         gsap.to(fadeElements, {
           opacity: 0.15,
@@ -114,10 +122,8 @@ export function HeroSection() {
             scrub: true,
           },
         });
-      }, sectionRef);
-    };
-
-    setupScrollBlurOut();
+      }); // ← no scope needed here since targets are explicit refs
+    });
 
     return () => {
       cancelled = true;
