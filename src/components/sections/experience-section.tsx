@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
-import { whenSmootherReady } from '@/lib/smoother-ready';
+import { onSmootherReady } from '@/lib/smoother-ready';
 import { Briefcase, ExternalLink } from 'lucide-react';
 import { experience } from '@/data/experience';
 import { TechBadge } from '@/components/ui/tech-badge';
@@ -188,15 +188,17 @@ export function ExperienceSection() {
   const itemsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const header = headerRef.current;
-    const items = itemsRef.current;
-    if (!header || !items) return;
-
-    const ctx = gsap.context(() => {});
     let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let cancelled = false;
 
-    const setupAnimations = () => {
-      if (!headerRef.current) return;
+    const setupAnimations = async () => {
+      await onSmootherReady();
+      if (cancelled) return;
+
+      const header = headerRef.current;
+      const items = itemsRef.current;
+      if (!header || !items) return;
+
       scrollCtx = gsap.context(() => {
         gsap.fromTo(
           header,
@@ -206,7 +208,7 @@ export function ExperienceSection() {
             duration: 0.9, ease: 'power3.out',
             scrollTrigger: {
               trigger: header,
-              scroller: '#smooth-wrapper',
+              // Removed scroller: '#smooth-wrapper'
               start: 'top 85%',
               toggleActions: 'play none none reverse',
             },
@@ -222,7 +224,7 @@ export function ExperienceSection() {
             stagger: { each: 0.15, from: 'start' },
             scrollTrigger: {
               trigger: items,
-              scroller: '#smooth-wrapper',
+              // Removed scroller: '#smooth-wrapper'
               start: 'top 85%',
               toggleActions: 'play none none reverse',
             },
@@ -231,13 +233,11 @@ export function ExperienceSection() {
       }, sectionRef);
     };
 
-    let cancelled = false;
-    whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
+    setupAnimations();
 
     return () => {
       cancelled = true;
       scrollCtx?.revert();
-      ctx.revert();
     };
   }, []);
 

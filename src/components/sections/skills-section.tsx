@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { whenSmootherReady } from '@/lib/smoother-ready';
+import { onSmootherReady } from '@/lib/smoother-ready';
 import { skills } from '@/data/skills';
 import { SkillCard } from '@/components/ui/skill-card';
 
@@ -15,18 +15,20 @@ export function SkillsSection() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    const header = headerRef.current;
-    const cardsContainer = cardsRef.current;
-    if (!section || !header || !cardsContainer) return;
-
-    const cards = Array.from(cardsContainer.children) as HTMLElement[];
-
-    const ctx = gsap.context(() => {});
     let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let cancelled = false;
 
-    const setupAnimations = () => {
-      if (!sectionRef.current) return;
+    const setupAnimations = async () => {
+      await onSmootherReady();
+      if (cancelled) return;
+
+      const section = sectionRef.current;
+      const header = headerRef.current;
+      const cardsContainer = cardsRef.current;
+      if (!section || !header || !cardsContainer) return;
+
+      const cards = Array.from(cardsContainer.children) as HTMLElement[];
+
       scrollCtx = gsap.context(() => {
         gsap.set(header, { opacity: 0, y: 30, filter: 'blur(8px)' });
         gsap.set(cards, { opacity: 0, y: 60, filter: 'blur(6px)', scale: 0.96 });
@@ -50,8 +52,7 @@ export function SkillsSection() {
 
         ScrollTrigger.create({
           trigger: section,
-          scroller: '#smooth-wrapper',
-          pinnedContainer: '#smooth-content',
+          // Removed explicit scroller & pinnedContainer so ScrollSmoother handles defaults
           start: 'top top',
           end: `+=${scrollDistance}`,
           pin: true,
@@ -66,13 +67,11 @@ export function SkillsSection() {
       }, sectionRef);
     };
 
-    let cancelled = false;
-    whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
+    setupAnimations();
 
     return () => {
       cancelled = true;
       scrollCtx?.revert();
-      ctx.revert();
     };
   }, []);
 

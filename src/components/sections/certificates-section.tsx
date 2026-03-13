@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { whenSmootherReady } from '@/lib/smoother-ready';
+import { onSmootherReady } from '@/lib/smoother-ready';
 import { ExternalLink, Award } from 'lucide-react';
 import { certificates } from '@/data/certificates';
 
@@ -14,10 +14,13 @@ export function CertificatesSection() {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {});
     let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let cancelled = false;
 
-    const setupAnimations = () => {
+    const setupAnimations = async () => {
+      await onSmootherReady();
+      if (cancelled) return;
+
       const header = headerRef.current;
       const list = listRef.current;
       if (!header || !list) return;
@@ -31,7 +34,7 @@ export function CertificatesSection() {
             duration: 0.9, ease: 'power3.out',
             scrollTrigger: {
               trigger: header,
-              scroller: '#smooth-wrapper',
+              // Removed scroller: '#smooth-wrapper'
               start: 'top 85%',
               toggleActions: 'play none none reverse',
             },
@@ -47,7 +50,7 @@ export function CertificatesSection() {
             stagger: { each: 0.15, from: 'start' },
             scrollTrigger: {
               trigger: list,
-              scroller: '#smooth-wrapper',
+              // Removed scroller: '#smooth-wrapper'
               start: 'top 85%',
               toggleActions: 'play none none reverse',
             },
@@ -56,13 +59,11 @@ export function CertificatesSection() {
       }, sectionRef);
     };
 
-    let cancelled = false;
-    whenSmootherReady(() => { if (!cancelled) setupAnimations(); });
+    setupAnimations();
 
     return () => {
       cancelled = true;
       scrollCtx?.revert();
-      ctx.revert();
     };
   }, []);
 

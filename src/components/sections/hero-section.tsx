@@ -9,7 +9,7 @@ import GradualBlur from '@/components/ui/gradual-blur';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { whenSmootherReady } from '@/lib/smoother-ready';
+import { onSmootherReady } from '@/lib/smoother-ready';
 
 // ScrollTrigger + ScrollSmoother are registered globally in SmoothScrollProvider.
 // Do NOT call registerPlugin here — re-registering ScrollTrigger alone after
@@ -87,14 +87,17 @@ export function HeroSection() {
     // scrollCtx is created fresh inside setupScrollBlurOut — AFTER the smoother
     // is ready — so it never captures a stale scroller proxy reference.
     let scrollCtx: ReturnType<typeof gsap.context> | null = null;
+    let cancelled = false;
 
-    const setupScrollBlurOut = () => {
-      // Guard: component may have unmounted before the timeout fired.
-      if (!sectionRef.current) return;
+    const setupScrollBlurOut = async () => {
+      await onSmootherReady();
+      if (cancelled) return;
 
-      // Create a brand-new context here, not ctx.add() — ctx.add() executes
-      // synchronously inside a context that was created before the smoother
-      // existed, giving it a stale scroller proxy and causing _gsap undefined.
+      // Guard: component may have unmounted before the promise resolved
+      const section = sectionRef.current;
+      if (!section) return;
+
+      // Create a brand-new context here
       scrollCtx = gsap.context(() => {
         gsap.to(fadeElements, {
           opacity: 0.15,
@@ -104,7 +107,8 @@ export function HeroSection() {
           stagger: 0.08,
           scrollTrigger: {
             trigger: section,
-            scroller: '#smooth-wrapper',
+            // We omitted scroller: '#smooth-wrapper' here because
+            // ScrollSmoother handles the default routing globally and safely.
             start: 'bottom 90%',
             end: 'bottom 5%',
             scrub: true,
@@ -113,8 +117,7 @@ export function HeroSection() {
       }, sectionRef);
     };
 
-    let cancelled = false;
-    whenSmootherReady(() => { if (!cancelled) setupScrollBlurOut(); });
+    setupScrollBlurOut();
 
     return () => {
       cancelled = true;
