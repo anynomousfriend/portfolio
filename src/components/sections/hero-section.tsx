@@ -107,7 +107,13 @@ export function HeroSection() {
       if (fadeElements.length === 0) return;
 
       scrollCtx = gsap.context(() => {
-        gsap.to(fadeElements, {
+        gsap.fromTo(fadeElements, 
+        {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+        },
+        {
           opacity: 0.15,
           y: -10,
           filter: 'blur(10px)',
