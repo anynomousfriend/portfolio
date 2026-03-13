@@ -5,12 +5,14 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { signalSmootherReady, resetSmootherReady } from '@/lib/smoother-ready';
+import { usePathname } from 'next/navigation';
 
 // Single global registration — all other components must NOT call registerPlugin
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const smootherRef = useRef<ScrollSmoother | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Reset FIRST — increments the generation counter, instantly invalidating
@@ -21,7 +23,8 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     // hitting a dead scroller proxy and crashing with _gsap undefined.
     resetSmootherReady();
 
-    // Kill any existing smoother/triggers — handles Strict Mode double-invoke.
+    // Kill any existing smoother/triggers — handles Strict Mode double-invoke 
+    // and route changes when navigating between pages.
     ScrollSmoother.get()?.kill();
     ScrollTrigger.killAll();
 
@@ -48,7 +51,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       smootherRef.current?.kill();
       smootherRef.current = null;
     };
-  }, []);
+  }, [pathname]); // Re-run effect when pathname changes
 
   return (
     <div id="smooth-wrapper">
