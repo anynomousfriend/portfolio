@@ -1415,3 +1415,125 @@ export function FoliobullVisual() {
     </div>
   );
 }
+
+// ─── 11. ProTradeTerminal ──────────────────────────────────────────────────────
+export function ProTradeTerminalVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+
+  return (
+    <div ref={ref} className="w-full h-full bg-zinc-950 p-3 flex flex-col gap-2 overflow-hidden relative">
+      {/* top accent */}
+      <motion.div
+        className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500"
+        initial={{ scaleX: 0, originX: 0 }}
+        animate={inView ? { scaleX: 1 } : {}}
+        transition={{ duration: 0.6, ease }}
+      />
+
+      {/* header */}
+      <motion.div
+        className="flex items-center justify-between"
+        variants={container} initial="hidden" animate={inView ? 'show' : 'hidden'}
+      >
+        <motion.div variants={shimmerToReveal} className="flex items-center gap-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[8px] font-bold text-zinc-300 font-mono tracking-widest">PRO TRADE</span>
+        </motion.div>
+        <motion.div variants={shimmerToReveal}>
+          <span className="text-[6px] text-emerald-400 font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">LIVE DATA</span>
+        </motion.div>
+      </motion.div>
+
+      {/* terminal layout: chart and order book */}
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex gap-1.5 flex-1"
+        >
+          {/* Chart area */}
+          <div className="flex-1 bg-zinc-900 rounded-sm border border-zinc-800 p-1.5 flex flex-col justify-end gap-1 relative overflow-hidden">
+            <div className="absolute top-1.5 left-1.5 text-[6px] text-zinc-500 font-mono">BTC/USD</div>
+            <div className="flex items-end justify-between h-12 gap-0.5 px-1 pb-1">
+              {[
+                { h: 40, wickSize: 20, up: true },
+                { h: 60, wickSize: 15, up: false },
+                { h: 45, wickSize: 20, up: true },
+                { h: 70, wickSize: 15, up: true },
+                { h: 55, wickSize: 30, up: false },
+                { h: 80, wickSize: 10, up: true },
+                { h: 65, wickSize: 25, up: false },
+                { h: 90, wickSize: 10, up: true },
+              ].map((candle, i) => (
+                <div key={i} className="relative flex flex-col items-center justify-end w-1.5 h-full">
+                  {/* Candlestick Wick */}
+                  <motion.div
+                    className={`absolute w-px ${candle.up ? 'bg-emerald-500' : 'bg-red-500'}`}
+                    initial={{ height: 0, bottom: 0 }}
+                    animate={{ 
+                      height: `${candle.h + candle.wickSize}%`, 
+                      bottom: `${Math.max(0, candle.h - (candle.wickSize * 1.5))}%` // Offset Wick slightly so it extends past body
+                    }}
+                    transition={{ duration: 0.8, delay: 0.3 + i * 0.05, ease }}
+                  />
+                  {/* Candlestick Body */}
+                  <motion.div
+                    className={`w-1.5 z-10 rounded-sm ${candle.up ? 'bg-emerald-500/90' : 'bg-red-500/90'}`}
+                    initial={{ height: 0, bottom: 0 }}
+                    animate={{ height: `${candle.h}%`, bottom: 0 }}
+                    transition={{ duration: 0.8, delay: 0.3 + i * 0.05, ease }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Order book / buttons */}
+          <div className="w-1/3 flex flex-col gap-1">
+            <div className="bg-zinc-900 rounded-sm border border-zinc-800 p-1 flex-1 flex flex-col justify-center gap-[2px]">
+              {[...Array(3)].map((_, i) => (
+                <div key={'sell'+i} className="flex justify-between items-center text-[5px] font-mono">
+                  <span className="text-red-400">{(64320 + i * 1.5).toFixed(1)}</span>
+                  <span className="text-zinc-500">0.0{i+1}</span>
+                </div>
+              ))}
+              <div className="h-px bg-zinc-800 my-[1px]" />
+              {[...Array(3)].map((_, i) => (
+                <div key={'buy'+i} className="flex justify-between items-center text-[5px] font-mono">
+                  <span className="text-emerald-400">{(64318 - i * 1.5).toFixed(1)}</span>
+                  <span className="text-zinc-500">0.0{i+2}</span>
+                </div>
+              ))}
+            </div>
+            {/* Buy / Sell buttons */}
+            <div className="flex gap-1 mt-auto">
+              <motion.div className="flex-1 bg-emerald-500/20 border border-emerald-500/40 text-[5px] text-emerald-400 text-center py-0.5 rounded-sm font-bold">BUY</motion.div>
+              <motion.div className="flex-1 bg-red-500/20 border border-red-500/40 text-[5px] text-red-400 text-center py-0.5 rounded-sm font-bold">SELL</motion.div>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="flex gap-1.5 flex-1">
+          <Skeleton className="flex-1 h-full" />
+          <div className="w-1/3 flex flex-col gap-1">
+            <Skeleton className="flex-1" />
+            <Skeleton className="h-3" />
+          </div>
+        </div>
+      )}
+
+      {inView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.0 }}
+          className="flex justify-between mt-auto"
+        >
+          <span className="text-[6px] text-zinc-600 font-mono">Advanced Trading Interface</span>
+          <span className="text-[6px] text-zinc-400 font-mono bg-zinc-800/50 px-1 py-[1px] rounded">0ms latency</span>
+        </motion.div>
+      )}
+    </div>
+  );
+}

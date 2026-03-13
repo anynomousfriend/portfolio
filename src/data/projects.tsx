@@ -12,6 +12,7 @@ import {
   AttastaraVisual,
   PoolFundersVisual,
   FoliobullVisual,
+  ProTradeTerminalVisual,
 } from '@/components/ui/project-visuals';
 
 export const projects: Record<ProjectCategory, ProjectData[]> = {
@@ -34,6 +35,25 @@ export const projects: Record<ProjectCategory, ProjectData[]> = {
     },
   ],
   dev: [
+    {
+      id: 0,
+      featured: true,
+      title: 'Pro Trade Terminal',
+      slug: 'pro-trade-terminal',
+      liveUrl: 'https://pro-trade-terminal-ten.vercel.app/',
+      githubUrl: 'https://github.com/anynomousfriend/ProTradeTerminal',
+      githubRepo: 'anynomousfriend/ProTradeTerminal',
+      desc: 'An advanced trading terminal interface providing real-time market data, interactive charting, and seamless order management for professional traders.',
+      tags: ['TypeScript', 'Next.js', 'Trading', 'WebSockets'],
+      coverImage: '/ProTradeTerminal.webp',
+      visual: <PolishedImageVisual imageUrl="/ProTradeTerminal.webp" fallbackAlt="Pro Trade Terminal Preview" gradientColors={['#0f172a', '#1e293b', '#334155']} hoverVisual={<ProTradeTerminalVisual />} />,
+      caseStudy: `# Pro Trade Terminal
+
+## Overview
+
+A high-performance trading terminal designed for professional traders. It offers real-time data visualization, precision charting tools, and a seamless interface to execute trades efficiently.
+`,
+    },
     {
       id: 1,
       title: 'Attestara',
